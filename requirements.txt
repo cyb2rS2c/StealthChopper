@@ -1,0 +1,5 @@
+aiofiles
+scapy
+colorama
+pyfiglet
+termcolor
