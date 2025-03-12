@@ -26,7 +26,7 @@ def create_ascii_text():
     color_list = ['red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'white']
 
     # Set default text
-    default_text = "Keep Thread Outside"
+    default_text = "Keep Threats Outside"
 
     # Clear the terminal screen
     os.system("clear")
