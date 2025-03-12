@@ -17,6 +17,9 @@ from collections import defaultdict
 from scapy.all import rdpcap, get_if_raw_hwaddr, socket
 import socket as std_socket
 import webbrowser
+from scapy.all import rdpcap
+import dns.resolver
+from dns.exception import DNSException
 
 def create_ascii_text():
     # create a list of fonts
@@ -343,8 +346,6 @@ async def run_wireshark(interface, target_ips, urls, exclude_ips):
         print(Fore.RED + f"An error occurred while running Wireshark: {e}")
 
 
-
-
 #resolve
 def resolve_ip_to_hostname(ip):
     """
@@ -362,10 +363,7 @@ def resolve_ip_to_hostname(ip):
     except std_socket.herror:
         return 'N/A'
 
-# return resolved_data
-from scapy.all import rdpcap
-import dns.resolver
-from dns.exception import DNSException
+
 
 
 
@@ -557,12 +555,12 @@ async def resolve_and_display_ips():
 async def filter_and_analyze_pcap():
     # Set up signal handler
     signal.signal(signal.SIGTERM, handle_sigterm)
-    
+    #Change  the following if needed: interface, url_file_path which include top common urls, 
     interface = 'wlan0'#change the wireless interface based on yours.
     url_file_path = 'url_file.txt'
     filter_file = 'excluded_ips.ef'
     exclude_ips = ["192.168.1.1", "192.168.1.2", "192.168.1.5", "192.168.1.125", "192.168.1.253"]#add or remove based ip:s to perform this exclusion.
-    target_ips = ["192.168.0.1"]#replace with actual target ip
+    target_ips = ["192.168.1.1"]#replace with actual target ip to sniff / add more target ip:s (manually to the list if needed)
 
     try:
         default_gateway, ip_address = await get_network_info(interface)
@@ -693,7 +691,7 @@ async def resolve_and_display_ips():
     target_ip_to_add=input("enter ip to add:")
     target_ips.clear()
     target_ips.append(target_ip_to_add)
-    interface="wlan0"
+    interface="wlan0"#change the interface based on yours 
 
     try:
         default_gateway, ip_address = await get_network_info(interface)
@@ -735,9 +733,9 @@ async def resolve_and_display_ips():
 async def menu():
     while True:
         print("\nMenu:")
-        print("1. Filter and Analyze Pcap")
-        print("2. Resolve and Display IPs")
-        print("3. Bettercap")
+        print("1. Sniffer: Filter and Analyze Pcap")#begin executing and observe how sniffing works.
+        print("2. Resolve and Display IPs")#require executing step 1 based on ip.
+        print("3. Spoofer: Bettercap")#after executing it open wireshark and observe how spoofing a target works.
         print("4. Exit")
 
         choice = input("Enter your choice: ")
@@ -746,7 +744,7 @@ async def menu():
             await filter_and_analyze_pcap()
         elif choice == '2':
             await resolve_and_display_ips()
-        elif choice == '3':
+        elif choice == '3':#run this option in user mode
             # Run Bettercap commands
             await run_bettercap()
 
