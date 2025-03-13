@@ -21,6 +21,14 @@ This project uses the following Python packages:
     colorama – Cross-platform support for colored terminal text.
     pyfiglet – ASCII art for banners.
     termcolor – Cross-platform support for colored terminal text.
+    dnsresolver: To resolve DNS queries. The package dnspython provides this functionality.
+    asyncio: It comes with Python by default, so it might not need to be added explicitly.
+
+
+
+
+
+
 
 # Installation
 
