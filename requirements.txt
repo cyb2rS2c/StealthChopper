@@ -1,5 +1,7 @@
+asyncio
 aiofiles
-scapy
 colorama
 pyfiglet
 termcolor
+scapy
+dnsresolver
