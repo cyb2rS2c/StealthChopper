@@ -736,15 +736,6 @@ async def filter_and_analyze_pcap(user_data):
 
 
 
-
-def has_packets(pcap_file):
-    """ Check if the PCAP file contains any packets. """
-    try:
-        packets = rdpcap(pcap_file)
-        return len(packets) > 0
-    except Exception as e:
-        print(Fore.RED + f"Error reading PCAP file: {e}")
-        return False
 async def resolve_and_display_ips(user_data):
     # Extract target_ips from user_data
     target_ips = user_data.get("target_ips", ["192.168.1.121"])  # Default if not set in user_data
