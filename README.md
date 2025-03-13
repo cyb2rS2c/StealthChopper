@@ -1,38 +1,28 @@
 # Async Network Tools
 
-This project provides a set of network analysis and manipulation tools implemented in Python using asynchronous programming. It offers the following features:
+MITM Attack & Network Sniffer Tool
 
-    Filter and Analyze Pcap Files
-    Resolve and Display IP Addresses
-    Bettercap Integration for Network Attacks
-    Apache and BeEF (Browser Exploitation Framework) Automation
+This repository contains a Python-based tool for performing various network-related tasks such as sniffing packets, running Man-in-the-Middle (MITM) attacks using Bettercap, and analyzing traffic in real time. The tool allows you to interact with network devices, capture traffic, and filter or analyze network traffic based on various conditions.
 
-Features
-1. Filter and Analyze Pcap
 
-Analyze network traffic captured in a .pcap file. The script processes and filters packets to extract relevant information.
-2. Resolve and Display IPs
+# Features
 
-Resolve domain names to their respective IP addresses and display them for network analysis.
-3. Bettercap Integration
+Sniffer: Capture packets, apply filters, and analyze network traffic.
+IP Resolver: Resolve and display the IP addresses of devices in the network.
+Spoofer (Bettercap): Perform MITM (Man-In-The-Middle) attacks using Bettercap.
+Aggressive Sniffer & MITM: Combine packet sniffing and MITM attacks for aggressive network analysis.
 
-Control Bettercap for network manipulation and exploitation. It also automatically starts Apache and BeEF (Browser Exploitation Framework).
-4. Apache & BeEF Automation
-
-    Apache: Automatically starts an Apache server.
-    BeEF: Starts the Browser Exploitation Framework for testing web browser vulnerabilities.
-
-Requirements
+# Requirements
 
 This project uses the following Python packages:
-
+    
     aiofiles – Asynchronous file handling.
     scapy – Network analysis tools for creating and manipulating network packets.
     colorama – Cross-platform support for colored terminal text.
     pyfiglet – ASCII art for banners.
     termcolor – Cross-platform support for colored terminal text.
 
-Installation
+# Installation
 
 Clone the repository:
 
@@ -45,28 +35,36 @@ Install the required Python dependencies:
 
 Ensure that Bettercap, Apache, and BeEF are installed and configured correctly.
 
-Usage
-
+# Usage
 Run the script:
 
-    python3 listenOnSomeOne.py
+    sudo python3 listenOnSomeOne.py
+    
 
-Menu Options:
+The menu offers the following choices:
 
-    1. Filter and Analyze Pcap: Filter and analyze .pcap files for network traffic data.
-    2. Resolve and Display IPs: Resolve and display IPs associated with domain names.
-    3. Bettercap: Control Bettercap, start Apache, and launch BeEF for browser exploitation.
-    4. Exit: Exit the program.
+Sniffer: Filter and Analyze Pcap
+Capture packets and filter/analyze them using specified parameters.
+
+Resolve and Display IPs
+Resolve IP addresses on the network and display information about devices connected.
+
+Spoofer: Bettercap ('MITM attack')
+Perform a Man-In-The-Middle (MITM) attack using Bettercap.
+
+Aggressive Sniffer + MITM
+Run both the sniffer and MITM attack simultaneously.
+
+Exit
+Exit the tool.
+
 
 After selecting an option, the script will guide you through the next steps. Press Ctrl+C to stop any ongoing processes.
 
-Educational Purposes
+# Educational Purposes
 
 This project is intended for educational purposes only. The code demonstrates how to interact with system commands and network interfaces via Python. Do not use this toolkit for unauthorized or illegal network activities. Always obtain proper authorization before testing network security.
-Contributing
 
-Contributions are welcome! Feel free to fork this repository and submit pull requests. Please include detailed explanations and adhere to the educational and ethical guidelines provided.
-
-Disclaimer
+# Disclaimer!
 
 This code is provided "as-is" without any warranty. The author is not responsible for any misuse or damage caused by the use of this software. Always practice responsible security testing.
