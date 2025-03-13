@@ -36,6 +36,10 @@ Install the required Python dependencies:
 Ensure that Bettercap, Apache, and BeEF are installed and configured correctly.
 
 # Usage
+Before Running the Script
+
+Before running the script, make sure to edit the "url_file.txt" file and add more common URLs you want to match in the Wireshark filter. The script will use these URLs to look for traffic containing the specified domains or full URLs during packet capture. You can add as many URLs as you want, one per line.
+
 Run the script:
 
     sudo python3 listenOnSomeOne.py
