@@ -1042,6 +1042,7 @@ async def menu():
                     run_bettercap()
                 )
             elif choice == '5':
+                kill_all_terminals()
                 print("Exiting...")
                 return  # Return from the menu, ending the loop
             else:
@@ -1057,7 +1058,7 @@ async def main():
     except asyncio.CancelledError:
         print("Event loop was canceled or the program is exiting.")
         await menu()
-        kill_all_terminals() 
+        
         
     finally:
         os.system('clear')
