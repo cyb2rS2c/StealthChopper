@@ -76,7 +76,7 @@ def get_ip_range(excluded_ips):
     ranges.append(f"{start}-{end}" if start != end else str(start))
 
     # Return formatted IP range for Ettercap
-    return ",".join(ranges)  # Example: "192.168.0.100-192.168.0.120,192.168.0.150"
+    return ",".join(ranges) 
 
 
 def isip(lst, store=None):
@@ -182,7 +182,7 @@ async def get_user_input():
 
     # Collect the target IP(s) for scanning
     if "target_ips" not in user_data or not user_data["target_ips"]:
-        # target_ips_input = input("Enter the target IPs (comma separated) or press enter to skip and read them from the file allowed_scope.txt: ").strip()
+        
         target_ips_input = input("Enter the target IPs (comma separated) or press enter to skip and read them from the file allowed_scope.txt: ").strip()
         if target_ips_input == '':
             try:
@@ -239,10 +239,10 @@ async def get_user_input():
 def parse_ips(input_ips):
     """
     Parse the input IPs which can be in any of these formats:
-    - Single IP as a string: '192.168.0.100'
-    - Comma-separated IPs as a string: '192.168.0.100,192.168.0.101'
-    - List of IPs: ['192.168.0.100', '192.168.0.101']
-    - IP range as a string: '192.168.0.100-192.168.0.102'
+    - Single IP as a string: '192.168.0.1'
+    - Comma-separated IPs as a string: '192.168.1.10,192.168.0.3'
+    - List of IPs: ['192.168.1.10', '192.168.1.3']
+    - IP range as a string: '192.168.0.1-192.168.0.254'
     Returns a list of IPs.
     """
     ip_list = []
