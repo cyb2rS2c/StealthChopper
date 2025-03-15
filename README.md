@@ -16,13 +16,13 @@ Aggressive Sniffer & MITM: Combine packet sniffing and MITM attacks for aggressi
 
 This project uses the following Python packages:
     
-    aiofiles – Asynchronous file handling.
-    scapy – Network analysis tools for creating and manipulating network packets.
-    colorama – Cross-platform support for colored terminal text.
-    pyfiglet – ASCII art for banners.
-    termcolor – Cross-platform support for colored terminal text.
-    dnsresolver: To resolve DNS queries. The package dnspython provides this functionality.
-    asyncio: It comes with Python by default, so it might not need to be added explicitly.
+    aiofiles: Used for asynchronous file operations.
+    colorama: A cross-platform library for colored terminal text.
+    pyfiglet: A library for creating ASCII art text.
+    termcolor: Another library for coloring terminal text.
+    scapy: A powerful Python library used for network packet manipulation and analysis.
+    psutil: A library for retrieving system and process information (like CPU, memory usage).
+    dns-python: A DNS toolkit for Python.
 
 
 
@@ -76,6 +76,9 @@ After selecting an option, the script will guide you through the next steps. Pre
 # Educational Purposes
 
 This project is intended for educational purposes only. The code demonstrates how to interact with system commands and network interfaces via Python. Do not use this toolkit for unauthorized or illegal network activities. Always obtain proper authorization before testing network security.
+# License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 # Disclaimer!
 
