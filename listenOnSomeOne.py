@@ -53,7 +53,6 @@ create_ascii_text()
 
 
 
-
 def get_ip_range(excluded_ips):
     # Sort the IPs
     excluded_ips = sorted([ipaddress.ip_address(ip) for ip in excluded_ips])
@@ -76,7 +75,7 @@ def get_ip_range(excluded_ips):
     ranges.append(f"{start}-{end}" if start != end else str(start))
 
     # Return formatted IP range for Ettercap
-    return ",".join(ranges) 
+    return ",".join(ranges)  # Example: "192.168.0.100-192.168.0.120,192.168.0.150"
 
 
 def isip(lst, store=None):
@@ -182,8 +181,7 @@ async def get_user_input():
 
     # Collect the target IP(s) for scanning
     if "target_ips" not in user_data or not user_data["target_ips"]:
-        
-        target_ips_input = input("Enter the target IPs (comma separated) or press enter to skip and read them from the file allowed_scope.txt: ").strip()
+        target_ips_input = input("Enter the target-ip or multiple targets (comma separated) or press enter to skip and read them from the file allowed_scope.txt: ").strip()
         if target_ips_input == '':
             try:
                 with open('allowed_scope.txt', 'r') as f:
@@ -237,14 +235,6 @@ async def get_user_input():
 
 
 def parse_ips(input_ips):
-    """
-    Parse the input IPs which can be in any of these formats:
-    - Single IP as a string: '192.168.0.1'
-    - Comma-separated IPs as a string: '192.168.1.10,192.168.0.3'
-    - List of IPs: ['192.168.1.10', '192.168.1.3']
-    - IP range as a string: '192.168.0.1-192.168.0.254'
-    Returns a list of IPs.
-    """
     ip_list = []
 
     # If input is a string, check if it contains a range or comma-separated values
@@ -321,7 +311,7 @@ async def run_ettercap(interface, default_gateway, target_ips, filter_file, url_
             print(f"Running Ettercap with command: {' '.join(ettercap_command)}")
             print('Wait for packets to appear in Wireshark...')
             print('Press Ctrl + C to return back to the menu')
-            os.system('clear')
+            
 
             if len(target_ips) > 1:
                 print('If you pass in more than 1 host, make sure to press Ctrl + C to see the results for other hosts.')
@@ -813,6 +803,8 @@ async def apply_filter_and_save(pcap_file, output_file, filter_str):
     except Exception as e:
         print(Fore.RED + f"An error occurred while filtering the pcap file: {e}")
     
+
+
 # Function to sanitize the filename to remove any invalid characters
 def sanitize_filename(filename):
     # List of characters to remove for filename safety
@@ -879,7 +871,6 @@ async def filter_and_analyze_pcap(user_data):
     target_ips = list(set(target_ips))  # Convert to a set and back to list to remove duplicates
 
     # Create sanitized filenames for pcap files (one for each target IP)
-    os.system('clear')
     print(f'The following files will be created after the attack:')
     for ip in target_ips:
         sanitized_ip = sanitize_filename(ip)
@@ -899,9 +890,7 @@ async def filter_and_analyze_pcap(user_data):
     if not compiled_file:
         print(Fore.RED + "Compilation failed.")
         return
-    print(f"Compiled file is located at: {compiled_file}")
-    os.system('clear')
-
+  
     # Create filter string
     exclude_filter = " && ".join([f"!(ip.src == {ip} || ip.dst == {ip})" for ip in exclude_ips])
     target_ip_filter = " || ".join([f"(ip.src == {ip} || ip.dst == {ip})" for ip in target_ips])
@@ -962,7 +951,7 @@ async def filter_and_analyze_pcap(user_data):
     print(Fore.GREEN + "Both filtering and Wireshark analysis completed.")
 async def resolve_and_display_ips():
 
-    target_ips = input('Enter the target_ip that you spoofed from the first step: ').split()  # Ensure target IP is part of user_data from previous steps
+    target_ips = input('Enter the target_ip that you spoofed from the first step: ').split()
     # Prepare the pcap file names using the first IP (or a default name if using a range)
     pcap_file = f'{target_ips[0]}_filtered_activity.pcap' if isinstance(target_ips, list) else f'{target_ips}_filtered_activity.pcap'
     
@@ -1004,6 +993,22 @@ async def resolve_and_display_ips():
             print(f"NetRange: {result.get('NetRange', 'N/A')}")
             print(f"Country: {result.get('Country', 'N/A')}")
             print(f"Abuse Contact: {result.get('Abuse Contact', 'N/A')}\n")
+def kill_all_terminals():
+    try:
+        # Get a list of all the processes running under 'gnome-terminal'
+        process_list = os.popen("ps aux | grep 'gnome-terminal'").readlines()
+
+        # Iterate over each process, skip grep and kill the actual gnome-terminal process
+        for process in process_list:
+            if 'gnome-terminal' in process and 'grep' not in process:
+                # Extract the PID from the process line
+                pid = int(process.split()[1])
+                print(f"Killing process with PID {pid}")
+                os.kill(pid, signal.SIGTERM)  # Sends SIGTERM to kill the process
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+
 async def menu():
     user_data = {}  # Store user inputs to prevent re-asking
 
@@ -1052,8 +1057,11 @@ async def main():
     except asyncio.CancelledError:
         print("Event loop was canceled or the program is exiting.")
         await menu()
+        kill_all_terminals() 
+        
     finally:
         os.system('clear')
+        
         
 
 if __name__ == "__main__":
