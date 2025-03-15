@@ -41,7 +41,6 @@ Install the required Python dependencies:
 
     pip install -r requirements.txt
 
-Ensure that Bettercap, Apache, and BeEF are installed and configured correctly.
 
 # Usage
 Before Running the Script
