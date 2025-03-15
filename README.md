@@ -45,7 +45,7 @@ Install the required Python dependencies:
 # Usage
 Before Running the Script
 
-Before running the script, make sure to edit the "url_file.txt" file and add more common URLs you want to match in the Wireshark filter. The script will use these URLs to look for traffic containing the specified domains or full URLs during packet capture. You can add as many URLs as you want, one per line.
+Before running the script, make sure to edit the "url_file.txt" file and add more common URLs you want to match in the Wireshark filter. The script will use these URLs to look for traffic containing the specified domains or full URLs during packet capture. You can add as many URLs as you want, one per line. Don't forget also to add your target ip addresses to the file "allowed_scope.txt".
 
 Run the script:
 
