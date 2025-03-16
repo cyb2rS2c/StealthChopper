@@ -23,6 +23,7 @@ from dns.exception import DNSException
 import ipaddress    
 import psutil
 import socket
+from common_url import main as cu
 
 def create_ascii_text():
     # create a list of fonts
@@ -1021,6 +1022,7 @@ async def menu():
         print("5. Exit")
 
         choice = input("Enter your choice: ")
+        cu() #Fetches common visited url from wikipedia
 
         try:
             if choice in {'1','4'}:
