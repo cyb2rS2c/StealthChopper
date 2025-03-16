@@ -723,28 +723,6 @@ async def whois_lookup(ip: str) -> dict:
     
 
 
-async def run_command(command, shell=False):
-    """Run a shell command asynchronously and return output and errors."""
-    try:
-        print(f"Executing command: {command}")  # Debug: Print the command being run
-        process = await asyncio.create_subprocess_shell(
-            command,
-            shell=shell,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            stdin=subprocess.PIPE
-        )
-        stdout, stderr = await process.communicate()
-        
-        print(f"Command output: {stdout.decode()}")
-        if process.returncode != 0:
-            print(f"Command failed with error: {stderr.decode()}")
-        
-        return stdout.decode(), stderr.decode()
-    except Exception as e:
-        print(f"Exception occurred: {e}")
-        return "", str(e)
-
 async def run_bettercap():
     iptospoof = input("Enter IP to spoof (e.g., 192.168.0.121): ")
     domaintoforward = "unused.com"
