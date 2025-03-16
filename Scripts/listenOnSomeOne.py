@@ -24,6 +24,14 @@ import ipaddress
 import psutil
 import socket
 from common_url import main as cu
+import base64
+
+def to_base64(input_string):
+    encoded_bytes = base64.b64encode(input_string.encode('utf-8'))
+    return encoded_bytes.decode('utf-8')
+def from_base64(encoded_string):
+    decoded_bytes = base64.b64decode(encoded_string.encode('utf-8'))
+    return decoded_bytes.decode('utf-8')
 
 def create_ascii_text():
     # create a list of fonts
@@ -33,7 +41,7 @@ def create_ascii_text():
     color_list = ['red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'white']
 
     # Set default text
-    default_text = "Keep Threats Outside"
+    default_text = from_base64('S2VlcCBUaHJlYXRzIE91dHNpZGU=')
 
     # Clear the terminal screen
     os.system("clear")
@@ -43,40 +51,43 @@ def create_ascii_text():
 
     # Generate ASCII art using the random font
     ASCII_art_1 = pyfiglet.figlet_format(default_text, font=font_choice)
-
-    # Print the ASCII art in the chosen color
-    print(colored(f"Font: {font_choice}\n", color_choice))
     print(colored(ASCII_art_1, color_choice))
-    copy_right=colored("author cyb2rS2c",'red')
+    copy_right=colored(from_base64('YXV0aG9yIGN5YjJyUzJj'),'red')
     print(copy_right)
-# call function
+
 create_ascii_text()
 
-
-
 def get_ip_range(excluded_ips):
-    # Sort the IPs
-    excluded_ips = sorted([ipaddress.ip_address(ip) for ip in excluded_ips])
+    valid_ips = []
 
+    # Convert to valid IP addresses (ignoring invalid entries)
+    for ip in excluded_ips:
+        try:
+            valid_ips.append(ipaddress.ip_address(str(ip)))  # Convert to IP object
+        except ValueError:
+            print(f"Skipping invalid IP: {ip}")  # Log invalid entries
+
+    # If there are no valid IPs, return an empty string
+    if not valid_ips:
+        return ""
+
+    # Sort IPs
+    valid_ips.sort()
     # Create a list to hold the ranges
     ranges = []
-    start = excluded_ips[0]
-    end = excluded_ips[0]
+    start = end = valid_ips[0]
 
-    for ip in excluded_ips[1:]:
+    for ip in valid_ips[1:]:
         if int(ip) - int(end) == 1:
-            # Extend the current range
-            end = ip
+            end = ip  # Extend the range
         else:
-            # Store the completed range
             ranges.append(f"{start}-{end}" if start != end else str(start))
             start = end = ip
 
     # Add the last range
     ranges.append(f"{start}-{end}" if start != end else str(start))
 
-    # Return formatted IP range for Ettercap
-    return ",".join(ranges)  # Example: "192.168.0.100-192.168.0.120,192.168.0.150"
+    return ",".join(ranges)
 
 
 def isip(lst, store=None):
@@ -223,7 +234,6 @@ async def get_user_input():
         # List of IPs to exclude (denied IPs)
         user_data['exclude_ips'] = denied
 
-        # Print denied IPs range (optional)
         if not denied:
             print("No denied IPs found.")
         else:
@@ -436,7 +446,6 @@ async def compile_filter_file(filter_file, interface):
     print(f"Compiling filter file using interface: {interface}")
 
     try:
-        print(f"Compiling filter file with command: {' '.join(compile_command)}")
         compile_process = await asyncio.create_subprocess_exec(
             *compile_command,
             stdout=asyncio.subprocess.PIPE,
@@ -444,15 +453,11 @@ async def compile_filter_file(filter_file, interface):
         )
 
         stdout, stderr = await compile_process.communicate()
-
-        # Log the output
-        print(stdout.decode().strip())
         if compile_process.returncode != 0:
             error_message = stderr.decode().strip()
             print(Fore.RED + f"Error compiling the Ettercap filter file: {error_message}")
             return None
         else:
-            print(Fore.GREEN + f"Filter file compiled successfully into: {compiled_file}.")
             return compiled_file
     except Exception as e:
         print(Fore.RED + f"An error occurred while compiling the filter file: {e}")
@@ -537,7 +542,6 @@ def create_excluded_ips_file(filter_file, exclude_ips):
 
 def handle_sigterm(signum, frame):
     print(Fore.YELLOW + "Received termination signal. Cleaning up...")
-    # Implement any necessary cleanup here
     exit(0)
 
 
@@ -578,9 +582,6 @@ async def run_wireshark(interface, target_ips, urls, exclude_ips):
         filter_parts.append(f"({url_filters})")
 
     filter_str = " && ".join(filter_parts) if filter_parts else "ip"
-
-    # Print the combined filter for debugging
-    print(Fore.CYAN + f"Running Wireshark with combined filter: {filter_str}")
 
     # Command to run Wireshark with the filter
     command = [
@@ -726,7 +727,8 @@ async def whois_lookup(ip: str) -> dict:
 async def run_bettercap():
     iptospoof = input("Enter IP to spoof (e.g., 192.168.0.121): ")
     domaintoforward = "unused.com"
-
+    interface = await choose_interface_from_list()
+    print(interface)
     # Prepare the Bettercap commands with delays
     commands = [
         "net.probe on",
@@ -744,7 +746,7 @@ async def run_bettercap():
         'gnome-terminal', 
         '--', 
         'bash', '-c', 
-        f"echo 'Starting Bettercap...';bettercap -X -I wlan0; "  # Replace 'wlan0' with your interface
+        f"echo 'Starting Bettercap...';bettercap -X -I {interface}; "
         f"{' && '.join(commands)}; exec bash"
     ]
     
@@ -817,7 +819,8 @@ async def filter_and_analyze_pcap(user_data):
 
     try:
         # Run nmap scan to identify active devices in the target network
-        isactive = await run_nmap_scan(str(target_network))  # Pass the network string for Nmap
+        await run_nmap_scan(str(target_network))  # Pass the network string for Nmap
+       
         
     except Exception as e:
         print(Fore.RED + f"Error running Nmap scan: {e}")
@@ -827,12 +830,10 @@ async def filter_and_analyze_pcap(user_data):
     
     # Let the user select an IP to reinclude from the excluded IPs
     if exclude_ips:
-        print("Select an IP to reinclude from the excluded list:")
         for idx, ip in enumerate(exclude_ips, 1):
             print(f"{idx}. {ip}")
-        
         try:
-            reinclude_choice = ''
+            reinclude_choice = input('Select an IP to reinclude from the excluded list above:\nEnter a number from the excluded lists above or press enter to skip: ').strip()
             if reinclude_choice:
                 reinclude_choice = int(reinclude_choice)
                 if 1 <= reinclude_choice <= len(exclude_ips):
@@ -884,7 +885,6 @@ async def filter_and_analyze_pcap(user_data):
         url_filters
     ]))
 
-    print(Fore.CYAN + f"Applying filter to pcap file: {filter_str}")
 
     # Initialize tasks as None to ensure they are defined even if exceptions are raised
     ettercap_task = None
@@ -1001,13 +1001,13 @@ async def menu():
 
         choice = input("Enter your choice: ")
         cu() #Fetches common visited url from wikipedia
+        create_ascii_text()
 
         try:
             if choice in {'1','4'}:
                 # Ensure we collect user data only once
                 if not user_data:
                     user_data = await get_user_input()
-
             if choice == '1':
                 await filter_and_analyze_pcap(user_data)  # Use stored data
                 await menu()
