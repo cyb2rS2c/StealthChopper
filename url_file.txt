@@ -1,5 +1,0 @@
-https://www.example.com
-https://www.google.com
-https://www.apple.com
-http://localhost
-http://127.0.0.1
