@@ -4,4 +4,4 @@ pyfiglet
 termcolor
 scapy
 psutil
-dns-python
+dnspython
