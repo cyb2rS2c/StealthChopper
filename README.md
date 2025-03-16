@@ -41,6 +41,13 @@ Install the required Python dependencies:
 
     pip install -r requirements.txt
 
+Using a Virtual Environment (Recommended):
+    
+    #Create a virtual environment:
+    python3 -m venv myenv
+    source myenv/bin/activate
+    pip install -r requirements.txt
+
 
 # Usage
 Before Running the Script
