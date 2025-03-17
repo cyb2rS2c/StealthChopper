@@ -44,14 +44,21 @@ def get_table_urls(wikipedia_url):
 
     return list(urls)
 def main():
-    url = "https://en.wikipedia.org/wiki/List_of_most-visited_websites"  
+    url = "https://en.wikipedia.org/wiki/List_of_most-visited_websites"
+    
+    # Fetch URLs from the Wikipedia page
     urls = get_table_urls(url)
 
+    # Check if URLs were found
+    if not urls:
+        print("No URLs found, please make sure the Wikipedia page is available.")
+        return
 
-    # Print all found URLs
-    with open('url_file.txt', 'w') as f: 
+    with open('url_file.txt', 'w') as f:
         for u in urls:
             f.write(u + '\n')
+
+    print(f"URLs have been saved to 'url_file.txt'.")
 
 if __name__ == '__main__':
     main()
