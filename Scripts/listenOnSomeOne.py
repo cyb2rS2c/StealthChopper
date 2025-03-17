@@ -148,22 +148,37 @@ async def get_active_interface():
                 if stats and stats.isup:  # If the interface is active
                     return interface
     return None  # Return None if no active interface is found
-
+    
 async def choose_interface_from_list():
     # Get a list of all network interfaces
     interfaces = psutil.net_if_addrs().keys()
     print("Available interfaces:")
+    
+    # Display interfaces with their index
     for idx, interface in enumerate(interfaces, 1):
         print(f"{idx}. {interface}")
+
     # Prompt the user to choose an interface
     choice = input(f"Please choose a number (1-{len(interfaces)}): ").strip()
-    
+
     try:
-        # Return the selected interface
-        return list(interfaces)[int(choice) - 1]
+        # Get the selected interface
+        selected_interface = list(interfaces)[int(choice) - 1]
+        
+        # Check if the selected interface is up
+        interface_status = psutil.net_if_stats().get(selected_interface, None)
+        
+        if interface_status and interface_status.isup:
+            print(f"Selected interface: {selected_interface} (Up)")
+            return selected_interface
+        else:
+            print(f"Interface {selected_interface} is down. Please choose another interface.")
+            return await choose_interface_from_list()  # Recursively prompt user again if interface is down
+
     except (ValueError, IndexError):
         print("Invalid choice. Please try again.")
-        return choose_interface_from_list()
+        return await choose_interface_from_list()  # Recursively prompt user again if invalid choice
+
 
 
 async def get_user_input():
