@@ -84,6 +84,11 @@ After selecting an option, the script will guide you through the next steps. Pre
 # Educational Purposes
 
 This project is intended for educational purposes only. The code demonstrates how to interact with system commands and network interfaces via Python. Do not use this toolkit for unauthorized or illegal network activities. Always obtain proper authorization before testing network security.
+
+## 📝 Author
+- **cyb2rS2c**  
+- GitHub: cyb2rS2c(https://github.com/cyb2rS2c)
+
 # License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
