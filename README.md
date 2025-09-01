@@ -4,82 +4,83 @@ MITM Attack & Network Sniffer Tool
 
 This repository contains a Python-based tool for performing various network-related tasks such as sniffing packets, running Man-in-the-Middle (MITM) attacks using Bettercap, and analyzing traffic in real time. The tool allows you to interact with network devices, capture traffic, and filter or analyze network traffic based on various conditions.
 
-
 # Features
 
-Sniffer: Capture packets, apply filters, and analyze network traffic.
-IP Resolver: Resolve and display the IP addresses of devices in the network.
-Spoofer (Bettercap): Perform MITM (Man-In-The-Middle) attacks using Bettercap.
-Aggressive Sniffer & MITM: Combine packet sniffing and MITM attacks for aggressive network analysis.
+- **Aggressive Sniffer & MITM**: Simultaneously launches Ettercap, Bettercap, and Wireshark for a selected target IP and interface, with active filtering.
+- **Packet Filter Generator**: Generates and compiles a custom Ettercap filter file to drop all traffic except for the target IP.
+- **Wireshark Auto-Launch with Filter**: Wireshark will launch automatically with a display filter matching only the target IP and excluding all others.
+- **Interactive ASCII Art Banner**: Displays a random ASCII art banner for visual flair.
+- **Colorful Terminal Output**: Uses colorama and termcolor for friendly, readable terminal messages.
+- **Interface Validation**: Ensures valid IP/interface arguments and guides user input.
+- **Graceful Exit Handling**: Handles Ctrl+C interruptions gracefully.
 
 # Requirements
 
 This project uses the following Python packages:
-    
-    aiofiles: Used for asynchronous file operations.
-    colorama: A cross-platform library for colored terminal text.
-    pyfiglet: A library for creating ASCII art text.
-    termcolor: Another library for coloring terminal text.
-    scapy: A powerful Python library used for network packet manipulation and analysis.
-    psutil: A library for retrieving system and process information (like CPU, memory usage).
-    dns-python: A DNS toolkit for Python.
 
-
-
-
-
-
+- colorama: A cross-platform library for colored terminal text.
+- pyfiglet: A library for creating ASCII art text.
+- termcolor: Another library for coloring terminal text.
+- scapy: A powerful Python library used for network packet manipulation and analysis.
+- psutil: A library for retrieving system and process information (like CPU, memory usage).
+- ipaddress: For subnet and IP operations (standard library).
+- (System requirements: ettercap, bettercap, wireshark, gnome-terminal installed on the system.)
 
 # Installation
 
 Clone the repository:
 
-    git clone https://github.com/cyb2rS2c/listen_on_someone.git
-    cd listen_on_someone
+```bash
+git clone https://github.com/cyb2rS2c/listen_on_someone.git
+cd listen_on_someone
+```
 
 Install the required Python dependencies:
 
-    pip install -r requirements.txt
+```bash
+pip install -r requirements.txt
+```
 
 Using a Virtual Environment (Recommended):
-    
-    #Create a virtual environment:
-    python3 -m venv myenv
-    source myenv/bin/activate
-    pip install -r requirements.txt
 
+```bash
+# Create a virtual environment:
+python3 -m venv myenv
+source myenv/bin/activate
+pip install -r requirements.txt
+```
 
 # Usage
-Before Running the Script
 
-Before running the script, make sure to edit the "url_file.txt" file if applicable and add more common URLs you want to match in the Wireshark filter. The script will generate its own URLs and use these URLs to look for traffic containing the specified domains or full URLs during packet capture. You can add as many URLs as you want, one per line. Don't forget also to add your target ip addresses to the file "allowed_scope.txt", otherwise the script will target these hosts which may not exist in your network.
+**New CLI Usage:**
 
-Run the script as root:
-    
-    cd Scripts
-    chmod +x listenOnSomeOne.py
-    sudo python3 listenOnSomeOne.py
-    
+Run the script as root, specifying the target IP and interface as arguments:
 
-The menu offers the following choices:
+```bash
+cd Scripts
+chmod +x listenOnSomeOne.py
+sudo python3 listenOnSomeOne.py <target_ip> <interface>
+```
 
-Sniffer: Filter and Analyze Pcap
-Capture packets and filter/analyze them using specified parameters.
+**Example:**
+```bash
+sudo python3 listenOnSomeOne.py 192.168.1.121 wlan0
+```
 
-Resolve and Display IPs
-Resolve IP addresses on the network and display information about devices connected.
+- `<target_ip>`: The single IPv4 address you want to target.
+- `<interface>`: The network interface to use (e.g., `eth0`, `wlan0`).
 
-Spoofer: Bettercap ('MITM attack')
-Perform a Man-In-The-Middle (MITM) attack using Bettercap.
+The script will:
 
-Aggressive Sniffer + MITM
-Run both the sniffer and MITM attack simultaneously.
+1. Validate your inputs.
+2. Generate a filter file to exclude all IPs except the target.
+3. Compile the filter file for Ettercap.
+4. Launch Ettercap, Bettercap, and Wireshark in separate GNOME terminal windows.
+5. Wireshark will open with a display filter matching only traffic to/from your target IP.
 
-Exit
-Exit the tool.
-
-
-After selecting an option, the script will guide you through the next steps. Press Ctrl+C to stop any ongoing processes.
+**Note:**  
+If you see a usage message, double-check your arguments.  
+Press Ctrl+C in the main terminal to exit gracefully.
 
 # Educational Purposes
 
