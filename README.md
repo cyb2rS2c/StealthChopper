@@ -20,8 +20,7 @@ This project uses the following Python packages:
 
 - colorama: A cross-platform library for colored terminal text.
 - pyfiglet: A library for creating ASCII art text.
-- termcolor: Another library for coloring terminal text.
-- scapy: A powerful Python library used for network packet manipulation and analysis.
+- termcolor: Another library for coloring terminal.
 - psutil: A library for retrieving system and process information (like CPU, memory usage).
 - ipaddress: For subnet and IP operations (standard library).
 - (System requirements: ettercap, bettercap, wireshark, gnome-terminal installed on the system.)
