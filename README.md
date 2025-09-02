@@ -1,10 +1,10 @@
-# Async Network Tools
+# Async Network Tools + PCAP Analyzer
 
-**Aggressive Sniffer & MITM Launcher**
+## Aggressive Sniffer & MITM Launcher
 
-This Python-based tool allows network monitoring professionals and security enthusiasts to quickly spin up **Ettercap**, **Bettercap**, and **Wireshark** for packet sniffing and Man-in-the-Middle (MITM) analysis against a single target IP on a given interface.
+This Python-based tool allows network monitoring professionals and security enthusiasts to quickly spin up **Ettercap**, **Bettercap**, and **Wireshark** for packet sniffing and Man-in-the-Middle (MITM) analysis against a single target IP on a given interface.  
 
-It provides live filtering, domain-specific packet monitoring, and automated tool orchestration.
+It provides live filtering, domain-specific packet monitoring, automated tool orchestration, and now includes a **PCAP Analyzer** for analyzing captured traffic with optional IP and domain filtering.
 
 ---
 
@@ -17,6 +17,7 @@ It provides live filtering, domain-specific packet monitoring, and automated too
 - **Colorful Terminal Output**: Uses `colorama` and `termcolor` for visually friendly messages.  
 - **Interface & IP Validation**: Validates input IPs and network interfaces.  
 - **Graceful Exit Handling**: Handles Ctrl+C interrupts cleanly.  
+- **PCAP Analyzer**: Analyze `.pcap` files with optional IP and URL/domain filters, translating IPs to domains and summarizing top connections in a colorful output.
 
 ---
 
@@ -29,6 +30,9 @@ It provides live filtering, domain-specific packet monitoring, and automated too
   - `termcolor`
   - `psutil`
   - `ipaddress` (standard library)
+  - `scapy`
+  - `socket` (standard library)
+  - `collections` (standard library)
 
 - **System tools**:
 
@@ -89,6 +93,26 @@ sudo python3 listenOnSomeOne.py 192.168.1.121 wlan0
     5-Launch Ettercap, Bettercap, and Wireshark in separate terminal sessions.
     6-Apply a Wireshark filter for target IP and optionally domains from url_file.txt.
     Tip: Press Ctrl+C in the main terminal to exit gracefully.
+
+2️⃣ PCAP Analyzer
+
+Analyze captured traffic with optional IP and URL/domain filters:
+```bash
+python3 process_pcap.py <pcap_file> [filter_ip] [filter_url]
+```
+**Example:**
+```bash
+python3 process_pcap.py 192.168.1.121_filtered_activity.pcap 192.168.1.121 google.com
+```
+
+```<pcap_file>: Path to the .pcap file.
+*[filter_ip] (optional): Only show packets related to this IP.
+*[filter_url] (optional): Filter packets where source or destination IP resolves to a domain matching this keyword (e.g., google.com).
+*The analyzer provides:
+*Color-coded output for source/destination IPs and ports.
+*IP→domain translation for easier readability.
+*Summary of top 5 IPs and top 5 domains.
+```
 
 # Educational Purposes
 
