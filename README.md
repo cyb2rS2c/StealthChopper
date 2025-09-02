@@ -1,31 +1,45 @@
 # Async Network Tools
 
-MITM Attack & Network Sniffer Tool
+**Aggressive Sniffer & MITM Launcher**
 
-This repository contains a Python-based tool for performing various network-related tasks such as sniffing packets, running Man-in-the-Middle (MITM) attacks using Bettercap, and analyzing traffic in real time. The tool allows you to interact with network devices, capture traffic, and filter or analyze network traffic based on various conditions.
+This Python-based tool allows network monitoring professionals and security enthusiasts to quickly spin up **Ettercap**, **Bettercap**, and **Wireshark** for packet sniffing and Man-in-the-Middle (MITM) analysis against a single target IP on a given interface.
 
-# Features
+It provides live filtering, domain-specific packet monitoring, and automated tool orchestration.
 
-- **Aggressive Sniffer & MITM**: Simultaneously launches Ettercap, Bettercap, and Wireshark for a selected target IP and interface, with active filtering.
-- **Packet Filter Generator**: Generates and compiles a custom Ettercap filter file to drop all traffic except for the target IP.
-- **Wireshark Auto-Launch with Filter**: Wireshark will launch automatically with a display filter matching only the target IP and excluding all others.
-- **Interactive ASCII Art Banner**: Displays a random ASCII art banner for visual flair.
-- **Colorful Terminal Output**: Uses colorama and termcolor for friendly, readable terminal messages.
-- **Interface Validation**: Ensures valid IP/interface arguments and guides user input.
-- **Graceful Exit Handling**: Handles Ctrl+C interruptions gracefully.
+---
 
-# Requirements
+## Features
 
-This project uses the following Python packages:
+- **Aggressive Sniffer & MITM Launcher**: Launches Ettercap, Bettercap, and Wireshark simultaneously for a chosen target IP and interface.  
+- **Custom Packet Filter Generator**: Automatically generates and compiles an Ettercap filter file to drop traffic from all IPs except the target.  
+- **Wireshark Auto-Launch with Filters**: Opens Wireshark with a live display filter for the target IP and optionally filtered domains from `url_file.txt`.  
+- **Animated ASCII Art Banner**: Displays a colorful, animated ASCII banner at startup.  
+- **Colorful Terminal Output**: Uses `colorama` and `termcolor` for visually friendly messages.  
+- **Interface & IP Validation**: Validates input IPs and network interfaces.  
+- **Graceful Exit Handling**: Handles Ctrl+C interrupts cleanly.  
 
-- colorama: A cross-platform library for colored terminal text.
-- pyfiglet: A library for creating ASCII art text.
-- termcolor: Another library for coloring terminal.
-- psutil: A library for retrieving system and process information (like CPU, memory usage).
-- ipaddress: For subnet and IP operations (standard library).
-- (System requirements: ettercap, bettercap, wireshark, gnome-terminal installed on the system.)
+---
 
-# Installation
+## Requirements
+
+- **Python packages**:
+
+  - `colorama`
+  - `pyfiglet`
+  - `termcolor`
+  - `psutil`
+  - `ipaddress` (standard library)
+
+- **System tools**:
+
+  - `ettercap`
+  - `etterfilter`
+  - `bettercap`
+  - `wireshark`
+
+---
+
+## Installation
 
 Clone the repository:
 
@@ -60,26 +74,21 @@ cd Scripts
 chmod +x listenOnSomeOne.py
 sudo python3 listenOnSomeOne.py <target_ip> <interface>
 ```
-
 **Example:**
 ```bash
 sudo python3 listenOnSomeOne.py 192.168.1.121 wlan0
 ```
-
 - `<target_ip>`: The single IPv4 address you want to target.
 - `<interface>`: The network interface to use (e.g., `eth0`, `wlan0`).
+**The script will:**
 
-The script will:
-
-1. Validate your inputs.
-2. Generate a filter file to exclude all IPs except the target.
-3. Compile the filter file for Ettercap.
-4. Launch Ettercap, Bettercap, and Wireshark in separate GNOME terminal windows.
-5. Wireshark will open with a display filter matching only traffic to/from your target IP.
-
-**Note:**  
-If you see a usage message, double-check your arguments.  
-Press Ctrl+C in the main terminal to exit gracefully.
+    1-Validate your IP and interface input.
+    2-Ensure url_file.txt exists (generates it via common_url.py if missing).
+    3-Create a custom filter file excluding all other IPs.
+    4-Compile the filter file for Ettercap.
+    5-Launch Ettercap, Bettercap, and Wireshark in separate terminal sessions.
+    6-Apply a Wireshark filter for target IP and optionally domains from url_file.txt.
+    Tip: Press Ctrl+C in the main terminal to exit gracefully.
 
 # Educational Purposes
 
