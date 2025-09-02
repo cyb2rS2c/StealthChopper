@@ -1,9 +1,4 @@
-requests
-bs4
-aiofiles
 colorama
 pyfiglet
 termcolor
-scapy
 psutil
-dnspython
