@@ -17,7 +17,7 @@ init(autoreset=True)
 # Usage check
 if len(sys.argv) < 2:
     print(Fore.CYAN + f"Usage: python3 {sys.argv[0]} <pcap_file> [filter_ip] [filter_url]")
-    print(Fore.CYAN + "Example: python3 analyzer.py capture.pcap 192.168.0.121 google.com")
+    print(Fore.CYAN + "Example: python3 process_pcap.py 192.168.1.121_filtered_activity.pcap 192.168.1.121 google.com")
     sys.exit(1)
 
 pcap_file = sys.argv[1]
