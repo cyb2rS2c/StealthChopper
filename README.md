@@ -103,7 +103,7 @@ python3 src/process_pcap.py -f *.pcap -s "linkedin" -i "192.168.1.121"
 # This will display all the domains the user has queried in the PCAP.
 python3 src/process_pcap.py -f *.pcap -i "192.168.1.121"
 ```
-### Check all users who have visited linkedin.com:
+### 3. Check all users who have visited linkedin.com:
 ```bash
 # This will display all users who have visited any domain containing "linkedin".
 # It shows the visit status, including the time of visit.
