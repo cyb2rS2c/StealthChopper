@@ -87,9 +87,29 @@ python3 src/process_pcap.py <pcap_file>  -s [filter_url] -i [filter_ip]
 ```
 **Example:**
 
+### 1. Check if a user has visited `linkedin.com` from a specific IP address:
+
 ```bash
+# Check if the user with IP "192.168.1.121" has visited "linkedin.com"
+# If so, it will show the visit time and other useful details.
 python3 src/process_pcap.py -f *.pcap -s ".*linkedin.com" -i "192.168.1.121"
+
+# Alternatively, you can search for just "linkedin" (without the full domain).
+# This will match any domain containing "linkedin" like linkedin.com etc.
+python3 src/process_pcap.py -f *.pcap -s "linkedin" -i "192.168.1.121"
 ```
+### 2. Check all websites visited by a user with a specific IP address:
+```bash
+# This will display all the domains the user has queried in the PCAP.
+python3 src/process_pcap.py -f *.pcap -i "192.168.1.121"
+```
+### Check all users who have visited linkedin.com:
+```bash
+# This will display all users who have visited any domain containing "linkedin".
+# It shows the visit status, including the time of visit.
+python3 src/process_pcap.py -f *.pcap -s "linkedin"
+```
+
 **Tip:** Use Regex for domain filtering as shown in the example above if you don't want to enter the full FQDN.
 
 ## Screenshots
