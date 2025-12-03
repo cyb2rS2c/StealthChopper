@@ -8,13 +8,12 @@ from termcolor import colored
 def clean():
      os.system("clear" if os.name == "posix" else "cls")
 def create_ascii_text():
-    """Display animated ASCII art banner with random font/color."""
     font_list = pyfiglet.FigletFont.getFonts()
     color_list = ['red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'white']
     default_text = "Stealth Chopper"
     clean()
     font_choice = random.choice(font_list)
-    color_choice = 'magenta'
+    color_choice = random.choice(color_list)
     ascii_art = pyfiglet.figlet_format(default_text, font=font_choice)
     for line in ascii_art.splitlines():
         print(colored(line, color_choice))
