@@ -1,8 +1,5 @@
 #!/usr/bin/env python3
-"""
-PCAP Analyzer with DNS query filtering, colorful output,
-optional IP and URL/domain filter using regex.
-"""
+import sys
 import argparse
 from scapy.all import rdpcap, IP, DNS, DNSQR
 import re
@@ -60,26 +57,23 @@ def is_private_ip(ip):
         if ip_obj in net:
             return True
     return False
-
-def extract_domain(dns_query):
-    """
-    Extract the domain name from a DNS query.
-    """
-    match = re.match(r"(?:[a-zA-Z0-9-]+\.)+([a-zA-Z0-9-]+\.[a-zA-Z]+)", dns_query)
+    
+def extract_base_domain(dns_query):
+    cleaned_query = re.sub(r',+', '.', dns_query)
+    cleaned_query = re.sub(r'[^\w\.-]', '', cleaned_query)
+    match = re.match(r"(?:[a-zA-Z0-9-]+\.)+([a-zA-Z0-9-]+\.[a-zA-Z]+)", cleaned_query)
     if match:
-        return match.group(1)
-    return dns_query 
+        domain = match.group(1)
+        parts = domain.split('.')
+        return '.'.join(parts[-2:])
+    return cleaned_query
+
 
 def format_timestamp(ts):
     return datetime.fromtimestamp(float(ts)).strftime("%Y-%m-%d %H:%M:%S")
-
 def process_pcap(pcap_file, filter_ip=None, filter_url=None, search_string=None):
-    """
-    Process the PCAP file and output the results.
-    """
     visited_domains_by_ip = {}
     visited_time_by_ip = {}
-
     try:
         packets = rdpcap(pcap_file)
     except FileNotFoundError:
@@ -97,11 +91,12 @@ def process_pcap(pcap_file, filter_ip=None, filter_url=None, search_string=None)
             if DNS in pkt and pkt.haslayer(DNSQR):
                 dns_qr = pkt[DNSQR]
                 dns_query = dns_qr.qname.decode()
+                base_domain = extract_base_domain(dns_query)
 
-                if search_string and not re.search(search_string, dns_query, re.IGNORECASE):
+                if search_string and not re.search(search_string, base_domain, re.IGNORECASE):
                     continue
-
-                domain = extract_domain(dns_query)
+                full_url = extract_base_domain(dns_query)
+                domain = extract_base_domain(dns_query)
 
                 if src not in visited_domains_by_ip:
                     visited_domains_by_ip[src] = set()
@@ -114,17 +109,17 @@ def process_pcap(pcap_file, filter_ip=None, filter_url=None, search_string=None)
     for ip, domains in visited_domains_by_ip.items():
         for domain in domains:
             time_visited = visited_time_by_ip[ip].get(domain, "N/A")
+            full_url = extract_base_domain(domain)
             row = [Fore.GREEN + ip, 
-                   Fore.YELLOW + domain, 
+                   Fore.YELLOW + full_url, 
                    Fore.GREEN + "Yes", 
                    Fore.WHITE + time_visited]
             table_data.append(row)
+
     print("\n" + Fore.GREEN + "[+] Visit Status:")
     headers = [Fore.YELLOW + "Source IP", Fore.YELLOW + "Visited URL", Fore.YELLOW + "Visited", Fore.YELLOW + "Time Visited"]
     print(tabulate(table_data, headers, tablefmt="fancy_grid", stralign="center"))
 
-
-import sys
 def parse_arguments():
     parser = argparse.ArgumentParser(description="PCAP Analyzer: Filter by IP and URL")
     parser.add_argument("-f", "--file", required=True, help="Path to the PCAP file.")
