@@ -79,7 +79,7 @@ sudo python3 listenOnSomeOne.py 192.168.1.121 wlan0
     6-Apply a Wireshark filter for target IP and optionally domains from url_file.txt.
     Tip: Press Ctrl+C in the main terminal to exit gracefully.
 
-3. PCAP Analyzer
+# PCAP Analyzer
 
 ## Usage
 ```
