@@ -34,7 +34,8 @@ This Python-based tool allows network monitoring professionals and security enth
 │   ├── listenOnSomeOne.py
 │   ├── process_pcap.py
 │   └── validation.py
-└── url_file.txt
+├── assets
+    └── url_file.txt
 ```
 
 ## Installation
