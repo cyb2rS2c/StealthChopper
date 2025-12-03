@@ -6,7 +6,6 @@ optional IP and URL/domain filter using regex.
 import argparse
 from scapy.all import rdpcap, IP, DNS, DNSQR
 import re
-from collections import Counter
 from colorama import init, Fore, Style
 from tabulate import tabulate
 import dns.resolver
@@ -78,7 +77,6 @@ def process_pcap(pcap_file, filter_ip=None, filter_url=None, search_string=None)
     """
     Process the PCAP file and output the results.
     """
-    ip_domain_cache = {}
     visited_domains_by_ip = {}
     visited_time_by_ip = {}
 
