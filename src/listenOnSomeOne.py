@@ -109,7 +109,7 @@ async def run_bettercap(interface, target_ip):
     bettercap_cmds = "; ".join(commands)
     
 
-    bettercap_cmd = ["bettercap", "-iface", interface, "-caplet", bettercap_cmds]
+    bettercap_cmd = ["bettercap", "-iface", interface, "-eval", bettercap_cmds]
     print(Fore.YELLOW + f"[*] Starting Bettercap on {interface} → {target_ip}")
     proc = await asyncio.create_subprocess_exec(*bettercap_cmd)
     await proc.communicate()
