@@ -17,6 +17,7 @@ Description:
 """
 
 import asyncio
+import time
 import os
 import re
 import subprocess
@@ -112,6 +113,7 @@ async def run_bettercap(interface, target_ip):
     bettercap_cmd = ["bettercap", "-iface", interface, "-eval", bettercap_cmds]
     print(Fore.YELLOW + f"[*] Starting Bettercap on {interface} → {target_ip}")
     proc = await asyncio.create_subprocess_exec(*bettercap_cmd)
+    time.sleep(1)
     await proc.communicate()
 
 def load_url_filters(url_file):
@@ -151,7 +153,7 @@ async def launch_wireshark(interface, target_ip, exclude_ips, url_file="assets/u
         output_file = f"{target_ip}_capture.pcap"
 
     filter_str = build_wireshark_filter(target_ip, exclude_ips, url_file)
-    print(Fore.BLUE + f"[*] Launching Wireshark on {interface} with filter:\n{filter_str}")
+    print(Fore.BLUE + f"[*] Launching Wireshark on {interface}")
     print(Fore.BLUE + f"[*] Capture will be saved to: {output_file}")
     subprocess.Popen([
         "tshark",
