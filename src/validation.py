@@ -4,6 +4,7 @@ import ipaddress
 import psutil
 import shutil
 import subprocess
+import re
 from colorama import Fore, init
 
 def is_valid_ipv4(ip):
@@ -24,8 +25,15 @@ def check_dependencies():
         print(Fore.RED + f"[!] Missing dependencies: {', '.join(missing)}")
         sys.exit(1)
 
+def is_valid_domain(domain):
+    domain = domain.rstrip('.')
+    if any(x in domain for x in ['.local', '_tcp', '_udp', '.arpa']):
+        return False
+    if re.match(r"(?:[a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}", domain):
+        return True
+    return False
+
 def ensure_url_file():
-    """Check if url_file.txt exists and has content, else run common_url.py."""
     assets_dir = "assets"
     url_file = os.path.join(assets_dir, "url_file.txt")
     needs_creation = False
