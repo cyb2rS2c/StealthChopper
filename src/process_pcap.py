@@ -53,7 +53,9 @@ def process_pcap(pcap_file, filter_ip=None, filter_url=None, search_string=None)
     table_data = []
     for ip, domains in visited_domains_by_ip.items():
         for domain in domains:
-            time_visited = visited_time_by_ip[ip].get(domain, "N/A")
+            domain = domain.rstrip('.')
+            time_visited = visited_time_by_ip[ip].get(domain, "")
+
             country = "Unknown"
             tld = "." + domain.split('.')[-1]
             country = tld_to_country.get(tld, "Unknown")
@@ -62,18 +64,26 @@ def process_pcap(pcap_file, filter_ip=None, filter_url=None, search_string=None)
                 Fore.GREEN + ip,
                 Fore.YELLOW + domain,
                 Fore.GREEN + "Yes",
-                Fore.WHITE + country,
-                Fore.WHITE + time_visited
+                Fore.WHITE + country
             ]
+            if not time_visited:
+                continue
+            if time_visited:
+                row.append(Fore.WHITE + time_visited)
+
             table_data.append(row)
+
     print("\n" + Fore.GREEN + "[+] Visit Status:")
     headers = [
         Fore.YELLOW + "Source IP", 
         Fore.YELLOW + "Visited Domain", 
         Fore.YELLOW + "Visited", 
-        Fore.YELLOW + "Country",
-        Fore.YELLOW + "Time Visited"
+        Fore.YELLOW + "Country"
     ]
+
+    if table_data and len(table_data[0]) == 5:
+        headers.append(Fore.YELLOW + "Time Visited")
+
     print(tabulate(table_data, headers, tablefmt="fancy_grid", stralign="center"))
 
 def parse_arguments():
