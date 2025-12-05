@@ -50,7 +50,7 @@ cd StealthChopper
 2. Install the required Python dependencies:
 
 ```bash
-chmod +x setup.sh;./setup.sh
+chmod +x setup.sh;source setup.sh
 ```
 
 ## Usage
