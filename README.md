@@ -21,21 +21,23 @@ This Python-based tool allows network monitoring professionals and security enth
 ## Project Tree
 ```bash
 .
-├── 192.168.1.121_filtered_activity.pcap
+├── 192.168.0.121_filtered_activity.pcap
+├── assets
+│   ├── tld.txt
+│   └── url_file.txt
 ├── excluded_ips.ef
 ├── excluded_ips.efc
 ├── LICENSE
 ├── README.md
 ├── requirements.txt
 ├── setup.sh
-├── src
-│   ├── animation.py
-│   ├── common_url.py
-│   ├── listenOnSomeOne.py
-│   ├── process_pcap.py
-│   └── validation.py
-├── assets
-    └── url_file.txt
+└── src
+    ├── animation.py
+    ├── common_url.py
+    ├── extraction.py
+    ├── listenOnSomeOne.py
+    ├── process_pcap.py
+    └── validation.py
 ```
 
 ## Installation
