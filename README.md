@@ -116,7 +116,7 @@ python3 src/process_pcap.py -f *.pcap -s "linkedin"
 
 <img width="757" height="549" alt="image" src="https://github.com/user-attachments/assets/bcee7824-689a-461a-9f5a-16d616b46494" />
 <img width="652" height="157" alt="image" src="https://github.com/user-attachments/assets/414a249d-018c-4386-a6d4-50e0f8a0b2f8" />
-<img width="556" height="95" alt="image" src="https://github.com/user-attachments/assets/ca3070c4-90fb-4cb7-b618-04d4680e0de0" />
+<img width="658" height="92" alt="image" src="https://github.com/user-attachments/assets/3f69e0ed-2e43-420d-98cd-c5fcf9375952" />
 
 ## Educational Purposes
 
