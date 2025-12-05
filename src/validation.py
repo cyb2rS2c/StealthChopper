@@ -13,6 +13,19 @@ def is_valid_ipv4(ip):
         return True
     except Exception:
         return False
+def is_private_ip(ip):
+    private_ips = [
+        ipaddress.IPv4Network("10.0.0.0/8"),
+        ipaddress.IPv4Network("172.16.0.0/12"),
+        ipaddress.IPv4Network("192.168.0.0/16"),
+    ]
+    
+    ip_obj = ipaddress.ip_address(ip)
+    
+    for net in private_ips:
+        if ip_obj in net:
+            return True
+    return False
 
 def is_valid_iface(iface):
     return iface in psutil.net_if_addrs().keys()
