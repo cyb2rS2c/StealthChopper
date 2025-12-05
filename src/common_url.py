@@ -20,7 +20,7 @@ def get_table_urls(wikipedia_url):
         for table in tables:
             rows = table.find_all('tr')
             for row in rows:
-                links = row.find_all('a', href=True)
+                links = row.find_all('td', href=True)
                 for link in links:
                     url = link['href']
                     if re.match(r'https?://', url):
