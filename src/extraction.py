@@ -1,5 +1,8 @@
 import re
 import json
+import dns.resolver
+import dns.reversename
+from validation import is_private_ip
 
 def load_tld_mapping(file_path):
     with open(file_path, 'r') as file:
@@ -23,8 +26,24 @@ def extract_base_domain(dns_query, tld_to_country):
         base_domain = '.'.join(parts[-2:])
         tld = '.' + parts[-1]
         country = tld_to_country.get(tld, 'Unknown')
-        print(f"Base Domain: {base_domain}, Country: {country}")
         
         return base_domain, country
     else:
         return cleaned_query, 'Unknown'
+
+def ip_to_domain(ip, ip_domain_cache):
+    if ip in ip_domain_cache:
+        return ip_domain_cache[ip]
+    
+    if is_private_ip(ip):
+        ip_domain_cache[ip] = None
+        return None
+    try:
+        rev_name = dns.reversename.from_address(ip)
+        domain = dns.resolver.resolve(rev_name, "PTR")[0].to_text()
+        ip_domain_cache[ip] = domain
+    except (dns.resolver.NoAnswer, dns.resolver.NXDOMAIN, dns.exception.Timeout) as e:
+        ip_domain_cache[ip] = ip
+    except Exception as e:
+        ip_domain_cache[ip] = ip 
+    return ip_domain_cache[ip]
