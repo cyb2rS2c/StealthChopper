@@ -127,9 +127,9 @@ python3 src/process_pcap.py -f 192.168.0.121_filtered_activity.pcap -s "linkedin
 **Tip:** Use Regex for domain filtering as shown in the example above if you don't want to enter the full FQDN.
 ## Screenshots
 
-<img width="620" height="303" alt="adv2" src="https://github.com/user-attachments/assets/846e6ee8-351f-4fcf-b352-e019c68a619f" />
+<img width="965" height="543" alt="image" src="https://github.com/user-attachments/assets/66abd541-042e-4a2b-a8bd-45b4dd7b7deb" />
 
-<img width="757" height="549" alt="image" src="https://github.com/user-attachments/assets/bcee7824-689a-461a-9f5a-16d616b46494" />
+<img width="620" height="303" alt="adv2" src="https://github.com/user-attachments/assets/846e6ee8-351f-4fcf-b352-e019c68a619f" />
 
 <img width="777" height="222" alt="usage_pcap" src="https://github.com/user-attachments/assets/1b8d612e-cb72-42c7-8b7c-f1757dc7fe18" />
 
