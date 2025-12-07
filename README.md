@@ -23,6 +23,7 @@ This Python-based tool allows network monitoring professionals and security enth
 .
 ├── 192.168.0.121_filtered_activity.pcap
 ├── assets
+├── ├── targets.txt
 │   ├── tld.txt
 │   └── url_file.txt
 ├── excluded_ips.ef
@@ -36,6 +37,7 @@ This Python-based tool allows network monitoring professionals and security enth
     ├── common_url.py
     ├── extraction.py
     ├── listenOnSomeOne.py
+    ├── recon_scan.py
     ├── process_pcap.py
     └── validation.py
 ```
@@ -59,8 +61,14 @@ chmod +x setup.sh;source ./setup.sh
 
 Run the script as root, specifying the target IP and interface as arguments:
 
+### Option1 (Manually)
 ```bash
-sudo python3 listenOnSomeOne.py <target_ip> <interface>
+sudo python3 src/listenOnSomeOne.py <target_ip> <interface>
+```
+### Option2 (Automatically)
+
+```bash
+sudo python3 src/listenOnSomeOne.py --scan
 ```
 
 **Example:**
@@ -85,8 +93,10 @@ sudo python3 listenOnSomeOne.py 192.168.1.121 wlan0
 
 ## Usage
 ```
-python3 src/process_pcap.py <pcap_file>  -s [filter_url] -i [filter_ip]
+python3 src/process_pcap.py <pcap_file>  -s [filter_url] -i [filter_ip] -c [country] -t [HH:MM:SS | YYYY-MM-DD | YYYY-MM-DD HH:MM:SS]
 ```
+
+
 **Example:**
 
 ### 1. Check if a user has visited `linkedin.com` from a specific IP address:
@@ -123,8 +133,21 @@ python3 src/process_pcap.py -f 192.168.0.121_filtered_activity.pcap -s "linkedin
 python3 src/process_pcap.py -f 192.168.0.121_filtered_activity.pcap -s "linkedin" -t "2025-12-07 13:20:30"
 ```
 
-
 **Tip:** Use Regex for domain filtering as shown in the example above if you don't want to enter the full FQDN.
+
+### 6. Help
+#### To get help on how to use the script, you can view the usage instructions with the following commands:
+
+```bash
+python3 src/listenOnSomeOne.py -h
+``` 
+#### For PCAP analyzer type:
+```bash
+python3 src/process_pcap.py -h
+#OR
+python3 src/process_pcap.py 
+```
+
 ## Screenshots
 
 <img width="965" height="543" alt="image" src="https://github.com/user-attachments/assets/66abd541-042e-4a2b-a8bd-45b4dd7b7deb" />
