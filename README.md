@@ -51,7 +51,7 @@ git clone https://github.com/cyb2rS2c/StealthChopper.git
 cd StealthChopper
 ```
 
-2. Install the required Python dependencies:
+2. Install the required Python dependencies and run the program:
 
 ```bash
 chmod +x setup.sh;source ./setup.sh
