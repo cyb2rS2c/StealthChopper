@@ -163,18 +163,35 @@ async def launch_wireshark(interface, target_ip, exclude_ips, url_file="assets/u
     ])
     subprocess.Popen(["wireshark", "-i", interface, "-k", "-Y", filter_str])
 
+
 def print_usage():
     print(Fore.RED + f"{'<|>'*30}\n")
     print(Fore.CYAN + "Usage:")
-    print(Fore.YELLOW + "\tsudo python3 src/listenOnSomeOne.py <target_ip> <interface>\n")
-    print(Fore.CYAN + "Example:")
-    print(Fore.YELLOW + "\tsudo python3 src/listenOnSomeOne.py 192.168.1.100 eth0\n")
+    print(Fore.YELLOW + "\tsudo python3 src/listenOnSomeOne.py <target_ip> <interface>")
+    print(Fore.YELLOW + "\tsudo python3 src/listenOnSomeOne.py --scan\n")
+    print(Fore.CYAN + "Examples:")
+    print(Fore.YELLOW + "\tsudo python3 src/listenOnSomeOne.py 192.168.1.147 wlan0")
+    print(Fore.YELLOW + "\tsudo python3 src/listenOnSomeOne.py --scan")
+    print(Fore.CYAN + "\t(Automatically scans the network and lets you choose a target)\n")
     print(Fore.RED + f"{'<|>'*30}\n")
+
+def interactive_menu():
+    print(Fore.CYAN + "\nHow would you like to run the script?\n")
+    print(Fore.YELLOW + "1) Enter target IP and interface manually")
+    print(Fore.YELLOW + "2) Automatically scan the network for targets\n")
+    while True:
+        c = input(Fore.CYAN + "Select an option (1 or 2): ").strip()
+        if c == "1":
+            ip = input(Fore.CYAN + "Enter target IP: ").strip()
+            iface = input(Fore.CYAN + "Enter network interface: ").strip()
+            return "manual", ip, iface
+        if c == "2":
+            return "scan", None, None
+        print(Fore.RED + "[!] Invalid choice.")
 
 async def main(target_ip, interface, default_gateway, exclude_ips):
     filter_file = "excluded_ips.ef"
     create_excluded_ips_file(filter_file, exclude_ips)
-
     print(Fore.MAGENTA + "[*] Starting monitoring toolkit...")
     await asyncio.gather(
         run_ettercap(interface, default_gateway, target_ip, filter_file),
@@ -185,34 +202,50 @@ async def main(target_ip, interface, default_gateway, exclude_ips):
 if __name__ == "__main__":
     try:
         create_ascii_text()
-        if len(sys.argv) != 3:
-            print_usage()
-            sys.exit(1)
 
-        target_ip = sys.argv[1]
-        interface = sys.argv[2]
+        if len(sys.argv) == 1:
+            mode, ip_arg, iface_arg = interactive_menu()
+        else:
+            mode = "--scan" if "--scan" in sys.argv else "manual"
+            ip_arg = sys.argv[1] if len(sys.argv) >= 3 else None
+            iface_arg = sys.argv[2] if len(sys.argv) >= 3 else None
 
-        if not is_valid_ipv4(target_ip):
-            print(Fore.RED + "[!] Invalid target IP.")
-            sys.exit(1)
-        if not is_valid_iface(interface):
-            print(Fore.RED + "[!] Invalid network interface.")
-            sys.exit(1)
+        if mode == "scan":
+            from recon_scan import perform_nmap_scan, choose_target_by_index, get_subnet
+            subnet, iface = get_subnet()
+            print(Fore.CYAN + f"Detected subnet: {subnet}")
+            print(Fore.CYAN + f"Using interface: {iface}")
+            targets = perform_nmap_scan(subnet)
+            if not targets:
+                print(Fore.RED + "[!] No targets found during scan.")
+                sys.exit(1)
+            target_ip, target_name = choose_target_by_index(targets)
+            interface = iface
+        else:
+            if not ip_arg or not iface_arg:
+                print_usage()
+                sys.exit(1)
+            target_ip = ip_arg
+            interface = iface_arg
+            if not is_valid_ipv4(target_ip):
+                print(Fore.RED + "[!] Invalid target IP.")
+                sys.exit(1)
+            if not is_valid_iface(interface):
+                print(Fore.RED + "[!] Invalid network interface.")
+                sys.exit(1)
 
         check_dependencies()
         url_file = ensure_url_file()
-
         default_gateway, ip_address = get_network_info(interface)
         if not default_gateway or not ip_address:
             print(Fore.RED + "[!] Could not detect default gateway or local IP.")
             sys.exit(1)
-
         exclude_ips = create_excluded_ips_for_target(target_ip)
         asyncio.run(main(target_ip, interface, default_gateway, exclude_ips))
 
     except KeyboardInterrupt:
         print("\n[!] User interrupted. Exiting cleanly.")
         clean()
+
     except RuntimeError as e:
         print(f"[!] Error: {e}")
-
