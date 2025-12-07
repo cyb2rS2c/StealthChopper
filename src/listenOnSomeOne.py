@@ -26,6 +26,7 @@ import ipaddress
 from colorama import Fore, init
 from animation import create_ascii_text,clean
 from validation import is_valid_ipv4,is_valid_iface,check_dependencies,ensure_url_file
+from recon_scan import perform_nmap_scan, choose_target_by_index, get_subnet
 init(autoreset=True)
 def get_network_info(interface):
     """Return (default_gateway, local_ip) for interface."""
@@ -211,7 +212,6 @@ if __name__ == "__main__":
             iface_arg = sys.argv[2] if len(sys.argv) >= 3 else None
 
         if mode == "scan":
-            from recon_scan import perform_nmap_scan, choose_target_by_index, get_subnet
             subnet, iface = get_subnet()
             print(Fore.CYAN + f"Detected subnet: {subnet}")
             print(Fore.CYAN + f"Using interface: {iface}")
