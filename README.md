@@ -93,7 +93,7 @@ sudo python3 listenOnSomeOne.py 192.168.1.121 wlan0
 
 ## Usage
 ```
-python3 src/process_pcap.py <pcap_file>  -s [filter_url] -i [filter_ip] -c [country] -t [HH:MM:SS | YYYY-MM-DD | YYYY-MM-DD HH:MM:SS]
+python3 src/process_pcap.py -f <pcap_file> -s [filter_url] -i [filter_ip] -c [country] -t [HH:MM:SS | YYYY-MM-DD | YYYY-MM-DD HH:MM:SS]
 ```
 
 
