@@ -65,7 +65,7 @@ Run the script as root, specifying the target IP and interface as arguments:
 ```bash
 sudo python3 src/listenOnSomeOne.py <target_ip> <interface>
 ```
-### Option2 (Automatically)
+### Option2 (Automatically)(Follow the wizzard)
 
 ```bash
 sudo python3 src/listenOnSomeOne.py --scan
