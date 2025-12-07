@@ -5,7 +5,7 @@
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue?logo=python)
 ![Platform](https://img.shields.io/badge/%7C%20Linux-green?logo=linux)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
-![Version](https://img.shields.io/badge/Version-3.0-orange)
+![Version](https://img.shields.io/badge/Version-4.0-orange)
 
 ---
 
@@ -94,31 +94,47 @@ python3 src/process_pcap.py <pcap_file>  -s [filter_url] -i [filter_ip]
 ```bash
 # Check if the user with IP "192.168.1.121" has visited "linkedin.com"
 # If so, it will show the visit time and other useful details.
-python3 src/process_pcap.py -f *.pcap -s ".*linkedin.com" -i "192.168.1.121"
+python3 src/process_pcap.py -f 192.168.0.121_filtered_activity.pcap -s ".*linkedin.com" -i "192.168.1.121"
 
 # Alternatively, you can search for just "linkedin" (without the full domain).
 # This will match any domain containing "linkedin" like linkedin.com etc.
-python3 src/process_pcap.py -f *.pcap -s "linkedin" -i "192.168.1.121"
+python3 src/process_pcap.py -f 192.168.0.121_filtered_activity.pcap -s "linkedin" -i "192.168.1.121"
 ```
 ### 2. Check all websites visited by a user with a specific IP address:
 ```bash
 # This will display all the domains the user has queried in the PCAP.
-python3 src/process_pcap.py -f *.pcap -i "192.168.1.121"
+python3 src/process_pcap.py -f 192.168.0.121_filtered_activity.pcap -i "192.168.1.121"
 ```
 ### 3. Check all users who have visited linkedin.com:
 ```bash
 # This will display all users who have visited any domain containing "linkedin".
 # It shows the visit status, including the time of visit.
-python3 src/process_pcap.py -f *.pcap -s "linkedin"
+python3 src/process_pcap.py -f 192.168.0.121_filtered_activity.pcap -s "linkedin"
+```
+### 4. Check users by country:
+```bash
+# This will display all users who have visited any domain containing "linkedin".
+# It filters results by country, showing only visits from users in the specified country (e.g., US).
+python3 src/process_pcap.py -f 192.168.0.121_filtered_activity.pcap -s "linkedin" -c "US"
+```
+### 5. Check users by specific visit time:
+```
+# This will display all users who visited any domain containing "linkedin" on a specific date and time (e.g., "2025-12-07 13:20:30").
+python3 src/process_pcap.py -f 192.168.0.121_filtered_activity.pcap -s "linkedin" -t "2025-12-07 13:20:30"
 ```
 
-**Tip:** Use Regex for domain filtering as shown in the example above if you don't want to enter the full FQDN.
 
+**Tip:** Use Regex for domain filtering as shown in the example above if you don't want to enter the full FQDN.
 ## Screenshots
 
+<img width="620" height="303" alt="adv2" src="https://github.com/user-attachments/assets/846e6ee8-351f-4fcf-b352-e019c68a619f" />
+
 <img width="757" height="549" alt="image" src="https://github.com/user-attachments/assets/bcee7824-689a-461a-9f5a-16d616b46494" />
-<img width="652" height="157" alt="image" src="https://github.com/user-attachments/assets/414a249d-018c-4386-a6d4-50e0f8a0b2f8" />
-<img width="658" height="92" alt="image" src="https://github.com/user-attachments/assets/3f69e0ed-2e43-420d-98cd-c5fcf9375952" />
+
+<img width="777" height="222" alt="usage_pcap" src="https://github.com/user-attachments/assets/1b8d612e-cb72-42c7-8b7c-f1757dc7fe18" />
+
+<img width="1113" height="169" alt="usage_pcap_example" src="https://github.com/user-attachments/assets/6ab4f0b7-7a38-42c3-b239-5f7311c1f555" />
+
 
 ## Educational Purposes
 
