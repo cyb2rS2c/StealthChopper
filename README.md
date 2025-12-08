@@ -169,7 +169,6 @@ python3 src/process_pcap.py
 ## Screenshots
 
 <img width="809" height="294" alt="image" src="https://github.com/user-attachments/assets/ccc9c452-84ed-4b68-9282-2fa3ce286369" />
-<img width="1267" height="85" alt="image" src="https://github.com/user-attachments/assets/7ddead89-35c9-436f-b612-da201e15daa5" />
 
 
 <img width="620" height="303" alt="adv2" src="https://github.com/user-attachments/assets/846e6ee8-351f-4fcf-b352-e019c68a619f" />
