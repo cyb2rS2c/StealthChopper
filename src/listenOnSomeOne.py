@@ -200,16 +200,43 @@ async def main(target_ip, interface, default_gateway, exclude_ips):
         launch_wireshark(interface, target_ip, exclude_ips, "assets/url_file.txt")
     )
 
-
 if __name__ == "__main__":
     try:
         create_ascii_text()
-        use_scan = "--scan" in sys.argv
+        if len(sys.argv) == 1 or "--interactive" in sys.argv:
+            mode, ip, iface = interactive_menu()
 
-        if use_scan:
+            if mode == "manual":
+                target_ip = ip
+                interface = iface
+
+                if not is_valid_ipv4(target_ip):
+                    print(Fore.RED + "[!] Invalid target IP.")
+                    sys.exit(1)
+                if not is_valid_iface(interface):
+                    print(Fore.RED + "[!] Invalid network interface.")
+                    sys.exit(1)
+
+            elif mode == "scan":
+                print(Fore.CYAN + "\n[INFO] Running automatic network scan…\n")
+
+                subnet, iface = get_subnet()
+                print(f"Detected subnet: {subnet}")
+                print(f"Using interface: {iface}")
+
+                targets = perform_nmap_scan(subnet)
+                if not targets:
+                    print(Fore.RED + "[!] No targets found during scan.")
+                    sys.exit(1)
+
+                target_ip, target_name = choose_target_by_index(targets)
+                print(Fore.GREEN + f"\n[+] Selected target: {target_ip} ({target_name})")
+
+                interface = iface
+
+        elif "--scan" in sys.argv:
             print(Fore.CYAN + "\n[INFO] Running automatic network scan…\n")
 
-            
             subnet, iface = get_subnet()
             print(f"Detected subnet: {subnet}")
             print(f"Using interface: {iface}")
@@ -223,7 +250,6 @@ if __name__ == "__main__":
             print(Fore.GREEN + f"\n[+] Selected target: {target_ip} ({target_name})")
 
             interface = iface
-
         else:
             if len(sys.argv) != 3:
                 print_usage()
@@ -253,8 +279,7 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("\n[!] User interrupted. Exiting cleanly.")
         clean()
-        
 
     except RuntimeError as e:
         print(f"[!] Error: {e}")
-        
+
