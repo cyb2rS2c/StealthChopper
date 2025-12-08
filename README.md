@@ -168,14 +168,10 @@ python3 src/process_pcap.py
 
 ## Screenshots
 
-<img width="809" height="294" alt="image" src="https://github.com/user-attachments/assets/ccc9c452-84ed-4b68-9282-2fa3ce286369" />
-
-
 <img width="620" height="303" alt="adv2" src="https://github.com/user-attachments/assets/846e6ee8-351f-4fcf-b352-e019c68a619f" />
+<img width="809" height="294" alt="image" src="https://github.com/user-attachments/assets/ccc9c452-84ed-4b68-9282-2fa3ce286369" />
 <img width="751" height="246" alt="image" src="https://github.com/user-attachments/assets/012f9b6e-d718-4664-b282-60b976cf32b2" />
-
-![image](https://github.com/user-attachments/assets/4d1f1016-6d50-4cbe-9f69-89b1222fd7e1)
-
+<img width="1014" height="95" alt="image" src="https://github.com/user-attachments/assets/0ee5b867-e355-448f-b46a-505e869c32d4" />
 
 
 
