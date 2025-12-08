@@ -19,5 +19,5 @@ for PROC in "${PROCESSES[@]}"; do
 done
 
 clear
-sudo python3 src/listenOnSomeOne.py
+sudo python3 src/listenOnSomeOne.py --interactive
 python3 src/process_pcap.py
