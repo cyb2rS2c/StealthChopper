@@ -56,6 +56,8 @@ def choose_target_by_index(targets):
             hostname = input("Enter the hostname: ").strip()
             targets[ip] = hostname
             print(f"Added {ip} -> {hostname} to targets.")
+            for i, (ip, hostname) in enumerate(targets.items()):
+                 print(f"  {i}) \033[1;32m{ip}\033[0m -> {hostname}")
             continue
         if not choice.isdigit():
             print("Please enter a valid number or 'add'.")
