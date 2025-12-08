@@ -51,7 +51,7 @@ git clone https://github.com/cyb2rS2c/StealthChopper.git
 cd StealthChopper
 ```
 
-2. Install the required Python dependencies and run the program:
+2. Install the required Python dependencies and run the program (**Interactive**):
 
 ```bash
 chmod +x setup.sh;source ./setup.sh
@@ -65,10 +65,14 @@ Run the script as root, specifying the target IP and interface as arguments:
 ```bash
 sudo python3 src/listenOnSomeOne.py <target_ip> <interface>
 ```
-### Option2 (Automatically)
+### Option2 (Wizard)
 
 ```bash
 sudo python3 src/listenOnSomeOne.py --scan
+```
+### Option3
+```bash
+sudo python3 src/listenOnSomeOne.py --interactive
 ```
 
 **Example:**
@@ -133,6 +137,20 @@ python3 src/process_pcap.py -f 192.168.0.121_filtered_activity.pcap -s "linkedin
 python3 src/process_pcap.py -f 192.168.0.121_filtered_activity.pcap -s "linkedin" -t "2025-12-07 13:20:30"
 ```
 
+### 6. New Features / Changes
+
+The following columns have been added and can now be filtered:
+
+***Vendor*** - the manufacturer of the device, based on the MAC address.
+
+***MAC Address*** - the device’s network interface identifier.
+
+***Hostname*** - the resolved name of the device.
+```bash
+# Example
+python3 src/process_pcap.py -f 192.168.0.121_filtered_activity.pcap -v "Liteon" -H "router" -m "00:00:00:00:00:00"
+```
+
 **Tip:** Use Regex for domain filtering as shown in the example above if you don't want to enter the full FQDN.
 
 ### 6. Help
@@ -150,13 +168,17 @@ python3 src/process_pcap.py
 
 ## Screenshots
 
-<img width="965" height="543" alt="image" src="https://github.com/user-attachments/assets/66abd541-042e-4a2b-a8bd-45b4dd7b7deb" />
+<img width="809" height="294" alt="image" src="https://github.com/user-attachments/assets/ccc9c452-84ed-4b68-9282-2fa3ce286369" />
+<img width="1267" height="85" alt="image" src="https://github.com/user-attachments/assets/7ddead89-35c9-436f-b612-da201e15daa5" />
+
 
 <img width="620" height="303" alt="adv2" src="https://github.com/user-attachments/assets/846e6ee8-351f-4fcf-b352-e019c68a619f" />
+<img width="751" height="246" alt="image" src="https://github.com/user-attachments/assets/012f9b6e-d718-4664-b282-60b976cf32b2" />
 
-<img width="777" height="222" alt="usage_pcap" src="https://github.com/user-attachments/assets/1b8d612e-cb72-42c7-8b7c-f1757dc7fe18" />
 
 <img width="1113" height="169" alt="usage_pcap_example" src="https://github.com/user-attachments/assets/6ab4f0b7-7a38-42c3-b239-5f7311c1f555" />
+<img width="1101" height="63" alt="image" src="https://github.com/user-attachments/assets/12aacd8d-c819-432b-bf3e-c6201442e11b" />
+
 
 
 ## Educational Purposes
