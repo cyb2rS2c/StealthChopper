@@ -174,9 +174,8 @@ python3 src/process_pcap.py
 <img width="620" height="303" alt="adv2" src="https://github.com/user-attachments/assets/846e6ee8-351f-4fcf-b352-e019c68a619f" />
 <img width="751" height="246" alt="image" src="https://github.com/user-attachments/assets/012f9b6e-d718-4664-b282-60b976cf32b2" />
 
+![image](https://github.com/user-attachments/assets/4d1f1016-6d50-4cbe-9f69-89b1222fd7e1)
 
-<img width="1113" height="169" alt="usage_pcap_example" src="https://github.com/user-attachments/assets/6ab4f0b7-7a38-42c3-b239-5f7311c1f555" />
-<img width="1101" height="63" alt="image" src="https://github.com/user-attachments/assets/12aacd8d-c819-432b-bf3e-c6201442e11b" />
 
 
 
