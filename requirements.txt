@@ -7,3 +7,4 @@ termcolor
 psutil
 scapy
 dnspython
+mac-vendor-lookup
