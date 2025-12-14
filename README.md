@@ -19,9 +19,13 @@ This Python-based tool allows network monitoring professionals and security enth
 
 ## Installation (with pip)
 ```bash
-chmod +x setup_pip.sh
+chmod +x setup_pip.sh;source ./setup_pip.sh; stealth-chopper
 ```
-
+***For more info:***
+```
+stealth-chopper -h
+stealth-chopper-pcap -h
+```
 ## Project Tree
 ```bash
 .
@@ -36,6 +40,7 @@ chmod +x setup_pip.sh
 ├── README.md
 ├── requirements.txt
 ├── setup.sh
+├── setup_pip.sh (optional using pip)
 └── src
     ├── animation.py
     ├── common_url.py
