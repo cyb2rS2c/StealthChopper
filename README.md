@@ -17,6 +17,10 @@ This Python-based tool allows network monitoring professionals and security enth
 2.  **Wireshark Auto-Launch with Filters**: Opens Wireshark with a live display filter for the target IP and optionally filtered domains from `url_file.txt`.   
 3.  **PCAP Analyzer**: This tool allows you to analyze PCAP files and filter packets based on a specific URL and/or IP address. It shows which domains were visited by a particular IP, including timestamps and visit status.
 
+## Installation (with pip)
+```bash
+chmod +x setup_pip.sh
+```
 
 ## Project Tree
 ```bash
