@@ -20,7 +20,7 @@ This Python-based tool allows network monitoring professionals and security enth
 ## Installation (with pip)
 ```bash
 curl -LO https://raw.githubusercontent.com/cyb2rS2c/StealthChopper/refs/heads/main/setup_pip.sh
-sudo chmod +x setup_pip.sh; source ./setup_pip.sh; stealth-chopper
+chmod +x setup_pip.sh; source ./setup_pip.sh
 ```
 ***For more info:***
 ```
