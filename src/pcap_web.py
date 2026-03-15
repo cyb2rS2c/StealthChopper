@@ -6,8 +6,8 @@ import re
 import os
 import sys
 from scapy.all import rdpcap, IP, DNS, DNSQR, Ether
-from stealth_chopper.extraction import extract_base_domain, load_tld_mapping
-from stealth_chopper.validation import is_valid_domain
+from extraction import extract_base_domain, load_tld_mapping
+from validation import is_valid_domain
 from mac_vendor_lookup import MacLookup
 
 venv_root = sys.prefix
