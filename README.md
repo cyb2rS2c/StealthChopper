@@ -5,7 +5,7 @@
 ![Python](https://img.shields.io/badge/Python-3.8%2B-blue?logo=python)
 ![Platform](https://img.shields.io/badge/%7C%20Linux-green?logo=linux)
 ![License](https://img.shields.io/badge/License-MIT-yellow)
-![Version](https://img.shields.io/badge/Version-4.1-orange)
+![Version](https://img.shields.io/badge/Version-4.2-orange)
 
 ---
 
@@ -163,17 +163,32 @@ python3 src/process_pcap.py -f 192.168.0.121_filtered_activity.pcap -v "Liteon" 
 
 **Tip:** Use Regex for domain filtering as shown in the example above if you don't want to enter the full FQDN.
 
-### 6. Help
+### 7. Help
 #### To get help on how to use the script, you can view the usage instructions with the following commands:
 
 ```bash
 python3 src/listenOnSomeOne.py -h
 ``` 
-#### For PCAP analyzer type:
+
+#### 1. **Run the PCAP Analyzer via Command Line**:
+
+- **To display help for the command line interface**:
 ```bash
 python3 src/process_pcap.py -h
-#OR
-python3 src/process_pcap.py 
+```
+
+- **To run the analyzer and process the PCAP file** (CLI mode):
+```bash
+python3 src/process_pcap.py
+```
+
+This will process the PCAP file and display the results in the terminal.
+
+#### 2. **Run the PCAP Analyzer via Web Interface (Streamlit)**:
+
+- **To run the analyzer with the web GUI** (recommended for interactive use):
+```bash
+streamlit run src/pcap_web.py
 ```
 
 ## Screenshots
@@ -182,8 +197,6 @@ python3 src/process_pcap.py
 <img width="600" height="294" alt="image" src="https://github.com/user-attachments/assets/ccc9c452-84ed-4b68-9282-2fa3ce286369" />
 <img width="600" height="246" alt="image" src="https://github.com/user-attachments/assets/012f9b6e-d718-4664-b282-60b976cf32b2" />
 <img width="600" height="137" alt="image" src="https://github.com/user-attachments/assets/7a1d8a6e-9bff-4581-b384-daab863fdfdc" />
-
-
 
 
 ## Educational Purposes
