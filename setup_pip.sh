@@ -8,4 +8,3 @@ clear
 stealth-chopper                  
 stealth-chopper-pcap -h    
 stealth-chopper-pcap
-stealth-chopper-webcap
