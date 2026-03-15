@@ -26,6 +26,7 @@ chmod +x setup_pip.sh; source ./setup_pip.sh
 ```
 stealth-chopper -h
 stealth-chopper-pcap -h
+stealth-chopper-webcap
 ```
 ## Project Tree
 ```bash
