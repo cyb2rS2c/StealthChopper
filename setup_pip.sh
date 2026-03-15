@@ -1,5 +1,6 @@
 #!/bin/bash                                                                   
 python3 -m venv myvenv;source myvenv/bin/activate
+sudo apt install bettercap -y
 pip install stealth-chopper                          
 alias stealth-chopper="sudo myvenv/bin/stealth-chopper"
 clear
