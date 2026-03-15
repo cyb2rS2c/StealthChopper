@@ -8,3 +8,5 @@ psutil
 scapy
 dnspython
 mac-vendor-lookup
+pandas
+streamlit
