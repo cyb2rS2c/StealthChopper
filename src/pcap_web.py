@@ -10,13 +10,7 @@ from extraction import extract_base_domain, load_tld_mapping
 from validation import is_valid_domain
 from mac_vendor_lookup import MacLookup
 
-venv_root = sys.prefix
-venv_name = os.path.basename(venv_root)
-lib_path = os.path.join(venv_root, 'lib')
-python_version = f"python{sys.version_info[0]}.{sys.version_info[1]}"
-site_packages = os.path.join(lib_path, python_version, 'site-packages')
-relative_path = os.path.join(venv_name, *site_packages.split(os.sep)[3:])
-tld_file_path = os.path.join(relative_path, 'stealth_chopper', 'assets', 'tld.txt')
+tld_file_path ='assets/tld.txt'
 tld_to_country = load_tld_mapping(tld_file_path)
 mac_lookup = MacLookup()
 
