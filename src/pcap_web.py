@@ -9,6 +9,7 @@ from scapy.all import rdpcap, IP, DNS, DNSQR, Ether
 from extraction import extract_base_domain, load_tld_mapping
 from validation import is_valid_domain
 from mac_vendor_lookup import MacLookup
+import glob
 
 tld_file_path ='assets/tld.txt'
 tld_to_country = load_tld_mapping(tld_file_path)
@@ -174,31 +175,53 @@ def main():
 
         Use the **dropdown menus** below to filter results interactively, making it easier to uncover key insights from your network traffic. 
 
-        **Ready to dive in?** Upload your PCAP file and start filtering the data for detailed network insights.
+        **Ready to dive in?** Upload your PCAP file or use the automatically detected one.
 
         **Author**: **cyb2rS2c**
     """)
 
-    uploaded_file = st.file_uploader("Choose a PCAP file", type="pcap")
-    
-    if uploaded_file is not None:
+    uploaded_file = st.file_uploader("Choose a PCAP file (optional)", type="pcap")
 
-        df = process_pcap(uploaded_file)
-        st.write("### Filter by Columns:")
-        selected_ip = st.selectbox("Filter by IP Address", ["All"] + list(df['Source IP'].unique()))
-        if selected_ip != "All":
-            df = df[df['Source IP'] == selected_ip]
-        selected_domain = st.selectbox("Filter by Domain", ["All"] + list(df['Visited Domain'].unique()))
-        if selected_domain != "All":
-            df = df[df['Visited Domain'] == selected_domain]
-        selected_vendor = st.selectbox("Filter by Vendor", ["All"] + list(df['Vendor'].unique()))
-        if selected_vendor != "All":
-            df = df[df['Vendor'] == selected_vendor]
-        selected_country = st.selectbox("Filter by Country", ["All"] + list(df['Country'].unique()))
-        if selected_country != "All":
-            df = df[df['Country'] == selected_country]
-        st.write("### Filtered Results:")
-        st.dataframe(df)
+    pcap_source = None
+
+    if uploaded_file is not None:
+        pcap_source = uploaded_file
+        st.success("Using uploaded PCAP file")
+
+    else:
+        pcap_files = glob.glob("*.pcap")
+
+        if pcap_files:
+            latest_pcap = max(pcap_files, key=os.path.getctime)
+            pcap_source = latest_pcap
+            st.success(f"Using detected PCAP file: {latest_pcap}")
+        else:
+            st.warning("No PCAP file found. Upload one or generate a .pcap file.")
+            return
+
+    df = process_pcap(pcap_source)
+
+    st.write("### Filter by Columns:")
+
+    selected_ip = st.selectbox("Filter by IP Address", ["All"] + list(df['Source IP'].dropna().unique()))
+    if selected_ip != "All":
+        df = df[df['Source IP'] == selected_ip]
+
+    selected_domain = st.selectbox("Filter by Domain", ["All"] + list(df['Visited Domain'].dropna().unique()))
+    if selected_domain != "All":
+        df = df[df['Visited Domain'] == selected_domain]
+
+    selected_vendor = st.selectbox("Filter by Vendor", ["All"] + list(df['Vendor'].dropna().unique()))
+    if selected_vendor != "All":
+        df = df[df['Vendor'] == selected_vendor]
+
+    selected_country = st.selectbox("Filter by Country", ["All"] + list(df['Country'].dropna().unique()))
+    if selected_country != "All":
+        df = df[df['Country'] == selected_country]
+
+    st.write("### Filtered Results:")
+    st.dataframe(df)
+
 
 if __name__ == '__main__':
     main()
