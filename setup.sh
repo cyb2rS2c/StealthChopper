@@ -21,17 +21,8 @@ done
 clear
 sudo python3 src/listenOnSomeOne.py --interactive
 
-echo "Choose an option:"
-echo "1) Run Python script (process_pcap.py)"
-echo "2) Run Streamlit app (pcap_web.py)"
-read -p "Enter 1 or 2: " choice
+echo "[*] Processing PCAP..."
+python3 src/process_pcap.py
 
-if [[ "$choice" -eq 1 ]]; then
-    echo "Running Python script (process_pcap.py)..."
-    python3 src/process_pcap.py
-elif [[ "$choice" -eq 2 ]]; then
-    echo "Running Streamlit app (pcap_web.py)..."
-    streamlit run src/pcap_web.py
-else
-    echo "Invalid option. Please enter 1 or 2."
-fi
+echo "[*] Launching Streamlit dashboard..."
+streamlit run src/pcap_web.py
