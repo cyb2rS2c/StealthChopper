@@ -10,3 +10,5 @@ dnspython
 mac-vendor-lookup
 pandas
 streamlit
+folium
+streamlit_folium
